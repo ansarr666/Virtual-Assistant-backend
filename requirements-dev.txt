@@ -1,0 +1,2 @@
+-r requirements.txt
+# Test tooling (pytest, pytest-asyncio, httpx) is pinned in requirements.txt.

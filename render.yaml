@@ -1,0 +1,57 @@
+# Render Blueprint: always-on backend for the lead bot.
+# Render dashboard -> New -> Blueprint -> pick this repository. Then fill in the
+# "sync: false" values (secrets) in the service's Environment tab.
+#
+# Use a paid instance type (e.g. "starter"): free instances sleep when idle, Meta's webhook
+# deliveries then fail, and Meta disables the webhooks after 1 hour of failures.
+services:
+  - type: web
+    name: orionsoft-lead-bot-api
+    runtime: docker
+    plan: starter
+    numInstances: 1          # must stay 1 (in-memory de-duplication / conversation locks)
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: REPOSITORY_BACKEND
+        value: google_sheets
+      - key: LOG_LEVEL
+        value: INFO
+      - key: META_API_VERSION
+        value: v20.0
+      - key: GOOGLE_SHEET_ID
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        sync: false
+      - key: RAG_API_BASE_URL
+        sync: false
+      - key: RAG_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: META_VERIFY_TOKEN
+        sync: false
+      - key: META_APP_ID
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: FB_PAGE_ID
+        sync: false
+      - key: FB_PAGE_ACCESS_TOKEN
+        sync: false
+      - key: IG_ACCOUNT_ID
+        sync: false
+      - key: IG_ACCESS_TOKEN
+        sync: false
+      - key: IG_APP_ID
+        sync: false
+      - key: IG_APP_SECRET
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false

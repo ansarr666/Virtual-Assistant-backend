@@ -1,0 +1,1598 @@
+{
+  "flow_id": "orionsoft_lead_gen",
+  "start_step": "welcome",
+  "routes": {
+    "MAIN_MENU": "welcome",
+    "SERVICES": "services",
+    "PRICING": "pricing",
+    "BOOK_CALL": "booking",
+    "HUMAN_AGENT": "talk_to_team",
+    "CONTACT_ME": "human_handoff",
+    "RAG": "rag_mode",
+    "GENERIC_REQUIREMENT": "generic_requirement",
+    "PORTFOLIO": "portfolio"
+  },
+  "global_options": {
+    "Main Menu": "welcome",
+    "Back to Main Menu": "welcome",
+    "Back to Services": "services",
+    "Our Services": "services",
+    "Explore Other Services": "services",
+    "Pricing & Estimates": "pricing",
+    "Talk to Our Team": "talk_to_team",
+    "Talk to Team": "talk_to_team",
+    "Book a Free Discovery Call": "booking",
+    "Have Someone Contact Me": "human_handoff",
+    "Ask a Question": "rag_mode",
+    "Ask Another Question": "rag_mode"
+  },
+  "fallback_options": [
+    "Our Services",
+    "Pricing & Estimates",
+    "Talk to Our Team",
+    "Main Menu"
+  ],
+  "services": {
+    "WEBSITE": {
+      "service": "Website Development",
+      "menu_step": "website_development",
+      "requirement_step": "website_requirement",
+      "pricing_step": "website_pricing",
+      "aliases": [
+        "Website",
+        "New Website",
+        "Website Redesign",
+        "E-commerce Website",
+        "Website Features"
+      ]
+    },
+    "MOBILE_APP": {
+      "service": "Mobile App Development",
+      "menu_step": "mobile_app",
+      "requirement_step": "mobile_requirement",
+      "pricing_step": "mobile_pricing",
+      "aliases": [
+        "Mobile App",
+        "App Idea",
+        "Android App",
+        "iOS App",
+        "Cross-Platform App",
+        "Existing App Improvements"
+      ]
+    },
+    "CUSTOM_SOFTWARE": {
+      "service": "Custom Software",
+      "menu_step": "custom_software",
+      "requirement_step": "custom_software_requirement",
+      "pricing_step": "custom_pricing",
+      "aliases": [
+        "Business Software",
+        "Process Automation",
+        "Custom Platform",
+        "System Integrations",
+        "Internal Tools"
+      ]
+    },
+    "AI_AUTOMATION": {
+      "service": "AI & Automation",
+      "menu_step": "ai_automation",
+      "requirement_step": "ai_requirement",
+      "pricing_step": "ai_pricing",
+      "aliases": [
+        "Business AI",
+        "Workflow Automation",
+        "Lead Generation AI",
+        "AI Personalization"
+      ]
+    },
+    "CHATBOT": {
+      "service": "AI Chatbot Development",
+      "menu_step": "chatbot",
+      "requirement_step": "chatbot_requirement",
+      "pricing_step": "chatbot_pricing",
+      "aliases": [
+        "AI Chatbot",
+        "Website Chatbot",
+        "WhatsApp Chatbot",
+        "Lead Generation Bot",
+        "Customer Support Bot",
+        "RAG Chatbot"
+      ]
+    },
+    "SHOPIFY_ECOMMERCE": {
+      "service": "E-commerce / Shopify",
+      "menu_step": "ecommerce",
+      "requirement_step": "ecommerce_requirement",
+      "pricing_step": "ecommerce_pricing",
+      "aliases": [
+        "E-commerce",
+        "New Store",
+        "Shopify Store",
+        "Store Redesign",
+        "Custom E-commerce Platform",
+        "Store Integrations"
+      ]
+    },
+    "SEO": {
+      "service": "SEO & Digital Marketing",
+      "menu_step": "seo_marketing",
+      "requirement_step": "marketing_requirement",
+      "pricing_step": "marketing_pricing",
+      "aliases": [
+        "SEO",
+        "Social Media Marketing",
+        "Paid Advertising",
+        "Paid Ads",
+        "SEO + Paid Ads",
+        "Digital Growth Strategy"
+      ]
+    }
+  },
+  "short_labels": {
+    "AI Chatbot Development": "AI Chatbots",
+    "Book a Free Discovery Call": "Book Discovery Call",
+    "Custom E-commerce Platform": "Custom E-commerce",
+    "Custom Features / Platform": "Custom Features",
+    "Digital Growth Strategy": "Growth Strategy",
+    "Existing App / Improvements": "Existing App",
+    "Existing Store Redesign": "Store Redesign",
+    "Explore Other Services": "Other Services",
+    "Get a Custom Strategy": "Custom Strategy",
+    "Get an Exact Estimate": "Exact Estimate",
+    "Have Someone Contact Me": "Contact Me",
+    "Mobile App Development": "Mobile Apps",
+    "Portfolio / Experience": "Portfolio",
+    "RAG / Knowledge Base Chatbot": "Knowledge Base Bot",
+    "SEO & Digital Marketing": "SEO & Marketing",
+    "Share More Project Details": "More Project Details",
+    "Share Project Details First": "Share Details First",
+    "Social Media Marketing": "Social Media",
+    "Store Integrations / Automation": "Store Integrations",
+    "Website Features / Technology": "Website Features"
+  },
+  "steps": {
+    "welcome": {
+      "reply": "Welcome to OrionSoft Technologies! How can we help you today?",
+      "options": {
+        "Our Services": {
+          "next_step": "services",
+          "intent": "SERVICES"
+        },
+        "Pricing & Estimates": {
+          "next_step": "pricing",
+          "intent": "PRICING"
+        },
+        "Portfolio / Experience": {
+          "next_step": "portfolio",
+          "intent": "PORTFOLIO"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team",
+          "intent": "HUMAN_AGENT"
+        },
+        "Ask a Question": {
+          "next_step": "rag_mode",
+          "intent": "RAG"
+        }
+      }
+    },
+    "services": {
+      "reply": "Which service are you interested in?",
+      "options": {
+        "Website Development": {
+          "next_step": "website_development",
+          "service": "Website Development",
+          "service_key": "WEBSITE"
+        },
+        "Mobile App Development": {
+          "next_step": "mobile_app",
+          "service": "Mobile App Development",
+          "service_key": "MOBILE_APP"
+        },
+        "Custom Software": {
+          "next_step": "custom_software",
+          "service": "Custom Software",
+          "service_key": "CUSTOM_SOFTWARE"
+        },
+        "AI & Automation": {
+          "next_step": "ai_automation",
+          "service": "AI & Automation",
+          "service_key": "AI_AUTOMATION"
+        },
+        "E-commerce / Shopify": {
+          "next_step": "ecommerce",
+          "service": "E-commerce / Shopify",
+          "service_key": "SHOPIFY_ECOMMERCE"
+        },
+        "SEO & Digital Marketing": {
+          "next_step": "seo_marketing",
+          "service": "SEO & Digital Marketing",
+          "service_key": "SEO"
+        },
+        "AI Chatbot Development": {
+          "next_step": "chatbot",
+          "service": "AI Chatbot Development",
+          "service_key": "CHATBOT"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "website_development": {
+      "reply": "What would you like help with regarding your website?",
+      "options": {
+        "New Website": {
+          "next_step": "website_requirement",
+          "sub_service": "New Website"
+        },
+        "Redesign My Website": {
+          "next_step": "website_requirement",
+          "sub_service": "Website Redesign"
+        },
+        "E-commerce Website": {
+          "next_step": "website_requirement",
+          "sub_service": "E-commerce Website"
+        },
+        "Website Features / Technology": {
+          "next_step": "website_requirement",
+          "sub_service": "Website Features"
+        },
+        "Other": {
+          "next_step": "website_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "website_requirement": {
+      "reply": "What type of website are you looking to build? Tell us briefly about your project goals.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "website_timeline"
+    },
+    "website_other": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "website_timeline"
+    },
+    "website_timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "website_pricing": {
+      "reply": "Website development pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+      "options": {
+        "Get an Exact Estimate": {
+          "next_step": "website_requirement",
+          "aliases": [
+            "exact estimate",
+            "estimate",
+            "quote",
+            "get estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "website_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "mobile_app": {
+      "reply": "What kind of mobile application are you planning?",
+      "options": {
+        "I Have an App Idea": {
+          "next_step": "mobile_app_idea",
+          "sub_service": "App Idea"
+        },
+        "Android App": {
+          "next_step": "mobile_requirement",
+          "sub_service": "Android App"
+        },
+        "iOS App": {
+          "next_step": "mobile_requirement",
+          "sub_service": "iOS App"
+        },
+        "Cross-Platform App": {
+          "next_step": "mobile_requirement",
+          "sub_service": "Cross-Platform App"
+        },
+        "Existing App / Improvements": {
+          "next_step": "mobile_requirement",
+          "sub_service": "Existing App Improvements"
+        },
+        "Other": {
+          "next_step": "mobile_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "mobile_app_idea": {
+      "reply": "Tell us briefly about your app idea.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "mobile_timeline"
+    },
+    "mobile_requirement": {
+      "reply": "Tell us briefly about the app you'd like to build.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "mobile_timeline"
+    },
+    "mobile_other": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "mobile_timeline"
+    },
+    "mobile_timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "mobile_pricing": {
+      "reply": "Mobile app development pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+      "options": {
+        "Get a Custom Quote": {
+          "next_step": "mobile_requirement",
+          "aliases": [
+            "custom quote",
+            "quote",
+            "estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "mobile_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "custom_software": {
+      "reply": "What type of custom software are you looking to develop?",
+      "options": {
+        "Business Software": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Business Software"
+        },
+        "Process Automation": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Process Automation"
+        },
+        "Custom Features / Platform": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Custom Platform"
+        },
+        "System Integrations": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "System Integrations"
+        },
+        "Internal Tools": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Internal Tools"
+        },
+        "Other": {
+          "next_step": "custom_software_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "custom_software_requirement": {
+      "reply": "What are you looking to automate, improve or build?",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "custom_software_timeline"
+    },
+    "custom_software_other": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "custom_software_timeline"
+    },
+    "custom_software_timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "custom_pricing": {
+      "reply": "Custom software pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+      "options": {
+        "Get a Custom Quote": {
+          "next_step": "custom_software_requirement",
+          "aliases": [
+            "custom quote",
+            "quote",
+            "estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "custom_software_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "ai_automation": {
+      "reply": "How can we help you leverage AI and automation?",
+      "options": {
+        "AI for My Business": {
+          "next_step": "ai_requirement",
+          "sub_service": "Business AI"
+        },
+        "AI Automation": {
+          "next_step": "ai_requirement",
+          "sub_service": "Workflow Automation"
+        },
+        "AI Lead Generation": {
+          "next_step": "ai_requirement",
+          "sub_service": "Lead Generation AI"
+        },
+        "AI Personalization": {
+          "next_step": "ai_requirement",
+          "sub_service": "AI Personalization"
+        },
+        "AI Chatbot": {
+          "next_step": "chatbot",
+          "sub_service": "AI Chatbot",
+          "service": "AI & Automation",
+          "service_key": "CHATBOT"
+        },
+        "Other": {
+          "next_step": "ai_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "ai_requirement": {
+      "reply": "Tell us briefly how you'd like to use AI in your business.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ai_timeline"
+    },
+    "ai_other": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ai_timeline"
+    },
+    "ai_timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "ai_pricing": {
+      "reply": "AI & automation pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+      "options": {
+        "Get a Custom Quote": {
+          "next_step": "ai_requirement",
+          "aliases": [
+            "custom quote",
+            "quote",
+            "estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "ai_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "chatbot": {
+      "reply": "What type of chatbot are you interested in?",
+      "options": {
+        "Website Chatbot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "Website Chatbot"
+        },
+        "WhatsApp Chatbot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "WhatsApp Chatbot"
+        },
+        "Lead Generation Bot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "Lead Generation Bot"
+        },
+        "Customer Support Bot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "Customer Support Bot"
+        },
+        "RAG / Knowledge Base Chatbot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "RAG Chatbot"
+        },
+        "Other": {
+          "next_step": "chatbot_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "chatbot_requirement": {
+      "reply": "Tell us briefly what you'd like the chatbot to do.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "chatbot_timeline"
+    },
+    "chatbot_other": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "chatbot_timeline"
+    },
+    "chatbot_timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "chatbot_pricing": {
+      "reply": "AI chatbot pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+      "options": {
+        "Get a Tailored Quote": {
+          "next_step": "chatbot_requirement",
+          "aliases": [
+            "tailored quote",
+            "quote",
+            "estimate",
+            "get quote"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "chatbot_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "ecommerce": {
+      "reply": "What kind of e-commerce solution are you looking for?",
+      "options": {
+        "New E-commerce Store": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "New Store"
+        },
+        "Shopify Store": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Shopify Store"
+        },
+        "Existing Store Redesign": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Store Redesign"
+        },
+        "Custom E-commerce Platform": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Custom E-commerce Platform"
+        },
+        "Store Integrations / Automation": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Store Integrations"
+        },
+        "Other": {
+          "next_step": "ecommerce_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "ecommerce_requirement": {
+      "reply": "Tell us briefly about the e-commerce store or features you need.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ecommerce_timeline"
+    },
+    "ecommerce_other": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ecommerce_timeline"
+    },
+    "ecommerce_timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "ecommerce_pricing": {
+      "reply": "E-commerce pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+      "options": {
+        "Get an Exact Estimate": {
+          "next_step": "ecommerce_requirement",
+          "aliases": [
+            "exact estimate",
+            "estimate",
+            "quote",
+            "get quote"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "ecommerce_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "seo_marketing": {
+      "reply": "What digital marketing services are you looking for?",
+      "options": {
+        "SEO": {
+          "next_step": "marketing_requirement",
+          "sub_service": "SEO"
+        },
+        "Social Media Marketing": {
+          "next_step": "marketing_requirement",
+          "sub_service": "Social Media Marketing"
+        },
+        "Paid Ads": {
+          "next_step": "marketing_requirement",
+          "sub_service": "Paid Advertising",
+          "aliases": [
+            "Paid Advertising",
+            "PPC",
+            "Google Ads",
+            "Meta Ads"
+          ]
+        },
+        "SEO + Paid Ads": {
+          "next_step": "marketing_requirement",
+          "sub_service": "SEO + Paid Ads"
+        },
+        "Digital Growth Strategy": {
+          "next_step": "marketing_requirement",
+          "sub_service": "Digital Growth Strategy"
+        },
+        "Other": {
+          "next_step": "marketing_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "marketing_requirement": {
+      "reply": "Tell us briefly about your marketing goals (e.g. increase traffic, generate leads, improve rankings, run paid campaigns):",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "marketing_timeline"
+    },
+    "marketing_other": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "marketing_timeline"
+    },
+    "marketing_timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "marketing_pricing": {
+      "reply": "SEO and digital marketing pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+      "options": {
+        "Get a Custom Strategy": {
+          "next_step": "marketing_requirement",
+          "aliases": [
+            "custom strategy",
+            "quote",
+            "estimate",
+            "get strategy"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "marketing_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "pricing": {
+      "reply": "What would you like an estimate for?",
+      "options": {
+        "Website": {
+          "next_step": "website_pricing",
+          "service": "Website Development",
+          "service_key": "WEBSITE",
+          "intent": "PRICING"
+        },
+        "Mobile App": {
+          "next_step": "mobile_pricing",
+          "service": "Mobile App Development",
+          "service_key": "MOBILE_APP",
+          "intent": "PRICING"
+        },
+        "Custom Software": {
+          "next_step": "custom_pricing",
+          "service": "Custom Software",
+          "service_key": "CUSTOM_SOFTWARE",
+          "intent": "PRICING"
+        },
+        "AI / Automation": {
+          "next_step": "ai_pricing",
+          "service": "AI & Automation",
+          "service_key": "AI_AUTOMATION",
+          "intent": "PRICING"
+        },
+        "AI Chatbot": {
+          "next_step": "chatbot_pricing",
+          "service": "AI Chatbot Development",
+          "service_key": "CHATBOT",
+          "intent": "PRICING"
+        },
+        "E-commerce": {
+          "next_step": "ecommerce_pricing",
+          "service": "E-commerce / Shopify",
+          "service_key": "SHOPIFY_ECOMMERCE",
+          "intent": "PRICING"
+        },
+        "SEO / Marketing": {
+          "next_step": "marketing_pricing",
+          "service": "SEO & Digital Marketing",
+          "service_key": "SEO",
+          "intent": "PRICING"
+        },
+        "Other": {
+          "next_step": "generic_requirement",
+          "intent": "PRICING"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "generic_requirement": {
+      "reply": "Tell us briefly what you're looking for.",
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "timeline"
+    },
+    "timeline": {
+      "reply": "What is your expected timeline?",
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1\u20133 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1\u20133 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "talk_to_team": {
+      "reply": "How would you like to continue?",
+      "options": {
+        "Get an Estimate": {
+          "next_step": "pricing",
+          "use_service_context": "pricing_step",
+          "aliases": [
+            "estimate",
+            "an estimate",
+            "quote",
+            "a quote"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "book",
+            "discovery call",
+            "meeting"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "email me",
+            "reach out to me",
+            "call me back"
+          ]
+        },
+        "Share Project Details First": {
+          "next_step": "generic_requirement",
+          "use_service_context": "requirement_step",
+          "aliases": [
+            "share details",
+            "share project details",
+            "give details",
+            "project details",
+            "share more project details"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "booking": {
+      "reply": "Great, let's book a free discovery call! What day and time work best for you? (Please include your time zone.)",
+      "action": "BOOK_CALL",
+      "input_type": "text",
+      "collects": "booking_slot",
+      "next_step": "booking_confirmed",
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "booking_confirmed": {
+      "reply": "Thank you! Your discovery call request has been received. Our team will follow up shortly to confirm the details.",
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "human_handoff": {
+      "reply": "Please share your preferred contact method (email or phone number), and our team will reach out directly.",
+      "action": "HUMAN_HANDOFF",
+      "input_type": "text",
+      "collects": "contact_info",
+      "next_step": "handoff_confirmed",
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "handoff_confirmed": {
+      "reply": "Thank you! Our team has received your contact details and will reach out to you shortly.",
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "portfolio": {
+      "reply": "What type of work would you like to see?",
+      "options": {
+        "E-commerce": {
+          "next_step": "portfolio_ecommerce"
+        },
+        "Website": {
+          "next_step": "portfolio_website"
+        },
+        "Mobile App": {
+          "next_step": "portfolio_mobile"
+        },
+        "Custom Platform": {
+          "next_step": "portfolio_custom"
+        },
+        "AI / Automation": {
+          "next_step": "portfolio_ai"
+        },
+        "Other": {
+          "next_step": "rag_mode"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "portfolio_ecommerce": {
+      "reply": "We build custom Shopify and Shopify Plus stores and custom e-commerce platforms, including payment gateways, product builders and inventory automation. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+      "options": {
+        "Discuss My Project": {
+          "next_step": "ecommerce",
+          "service": "E-commerce / Shopify",
+          "service_key": "SHOPIFY_ECOMMERCE"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "portfolio_website": {
+      "reply": "We build responsive corporate websites, high-converting landing pages and full-stack web applications using React, Next.js, Node.js and Python. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+      "options": {
+        "Discuss My Project": {
+          "next_step": "website_development",
+          "service": "Website Development",
+          "service_key": "WEBSITE"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "portfolio_mobile": {
+      "reply": "We build native iOS (Swift) and Android (Kotlin) apps and cross-platform apps with Flutter and React Native, including offline sync, push notifications and payment integration. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+      "options": {
+        "Discuss My Project": {
+          "next_step": "mobile_app",
+          "service": "Mobile App Development",
+          "service_key": "MOBILE_APP"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "portfolio_custom": {
+      "reply": "We build tailored SaaS platforms, enterprise portals, internal CRM/ERP automation and API integrations, deployed on AWS, GCP or Azure. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+      "options": {
+        "Discuss My Project": {
+          "next_step": "custom_software",
+          "service": "Custom Software",
+          "service_key": "CUSTOM_SOFTWARE"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "portfolio_ai": {
+      "reply": "We build business workflow automation, AI chatbots for websites and WhatsApp, and RAG assistants trained on company documents and internal knowledge. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+      "options": {
+        "Discuss My Project": {
+          "next_step": "ai_automation",
+          "service": "AI & Automation",
+          "service_key": "AI_AUTOMATION"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "rag_mode": {
+      "reply": "Ask me anything about our services, process, technologies, or pricing.",
+      "input_type": "rag",
+      "options": {
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "completed": {
+      "reply": "Thank you! Our team will take it from here.",
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    }
+  }
+}

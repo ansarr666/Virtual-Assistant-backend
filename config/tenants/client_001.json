@@ -1,0 +1,13 @@
+{
+  "tenant_id": "client_001",
+  "company_name": "OrionSoft Technologies",
+  "flow": "orionsoft_flow.json",
+  "status": "active",
+  "knowledge_base": "orionsoft",
+  "rag": {
+    "enabled": true,
+    "base_url_env": "RAG_API_BASE_URL",
+    "endpoint": "/api/public/conversation",
+    "timeout_seconds": 10.0
+  }
+}
