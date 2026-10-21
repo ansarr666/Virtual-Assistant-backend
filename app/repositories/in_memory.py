@@ -14,6 +14,7 @@ class InMemoryLeadRepository(LeadRepository):
         self.conversations: dict[tuple[str, str], dict[str, Any]] = {}
         self.messages: list[dict[str, Any]] = []
         self.states: dict[tuple[str, str], dict[str, Any]] = {}
+        self.leads: dict[tuple[str, str], dict[str, Any]] = {}
         self.idempotent_responses: dict[tuple[str, str, str], dict[str, Any]] = {}
 
     def clear(self):
@@ -21,19 +22,47 @@ class InMemoryLeadRepository(LeadRepository):
         self.conversations.clear()
         self.messages.clear()
         self.states.clear()
+        self.leads.clear()
         self.idempotent_responses.clear()
 
     def save_user(self, data: dict):
+        tenant_id = data.get("tenant_id", "")
+        user_id = data.get("user_id", "")
+        for u in self.users:
+            if u.get("tenant_id") == tenant_id and u.get("user_id") == user_id:
+                u.update(dict(data))
+                return
         self.users.append(dict(data))
+
+    def get_user(self, tenant_id: str, user_id: str):
+        for u in reversed(self.users):
+            if u.get("tenant_id") == tenant_id and u.get("user_id") == user_id:
+                return dict(u)
+        return None
 
     def save_conversation(self, data: dict):
         key = (data["tenant_id"], data["conversation_id"])
-        self.conversations[key] = dict(data)
+        if key in self.conversations:
+            self.conversations[key].update(dict(data))
+        else:
+            self.conversations[key] = dict(data)
 
     def get_conversation(self, tenant_id: str, conversation_id: str):
         key = (tenant_id, conversation_id)
         conv = self.conversations.get(key)
         return dict(conv) if conv else None
+
+    def save_lead(self, data: dict):
+        key = (data.get("tenant_id", ""), data.get("lead_id", ""))
+        if key in self.leads:
+            self.leads[key].update(dict(data))
+        else:
+            self.leads[key] = dict(data)
+
+    def get_lead(self, tenant_id: str, lead_id: str):
+        key = (tenant_id, lead_id)
+        lead = self.leads.get(key)
+        return dict(lead) if lead else None
 
     def save_message(self, data: dict):
         self.messages.append(dict(data))

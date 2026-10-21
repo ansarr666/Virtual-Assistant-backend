@@ -1,0 +1,1560 @@
+{
+  "steps": {
+    "welcome": {
+      "options": {
+        "Our Services": {
+          "next_step": "services",
+          "intent": "SERVICES"
+        },
+        "Pricing & Estimates": {
+          "next_step": "pricing",
+          "intent": "PRICING"
+        },
+        "Portfolio / Experience": {
+          "next_step": "portfolio",
+          "intent": "PORTFOLIO"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team",
+          "intent": "HUMAN_AGENT"
+        },
+        "Ask a Question": {
+          "next_step": "rag_mode",
+          "intent": "RAG"
+        }
+      },
+      "template_id": "welcome",
+      "type": "menu"
+    },
+    "services": {
+      "options": {
+        "Website Development": {
+          "next_step": "website_development",
+          "service": "Website Development",
+          "service_key": "WEBSITE"
+        },
+        "Mobile App Development": {
+          "next_step": "mobile_app",
+          "service": "Mobile App Development",
+          "service_key": "MOBILE_APP"
+        },
+        "Custom Software": {
+          "next_step": "custom_software",
+          "service": "Custom Software",
+          "service_key": "CUSTOM_SOFTWARE"
+        },
+        "AI & Automation": {
+          "next_step": "ai_automation",
+          "service": "AI & Automation",
+          "service_key": "AI_AUTOMATION"
+        },
+        "E-commerce / Shopify": {
+          "next_step": "ecommerce",
+          "service": "E-commerce / Shopify",
+          "service_key": "SHOPIFY_ECOMMERCE"
+        },
+        "SEO & Digital Marketing": {
+          "next_step": "seo_marketing",
+          "service": "SEO & Digital Marketing",
+          "service_key": "SEO"
+        },
+        "AI Chatbot Development": {
+          "next_step": "chatbot",
+          "service": "AI Chatbot Development",
+          "service_key": "CHATBOT"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "services",
+      "type": "menu"
+    },
+    "website_development": {
+      "options": {
+        "New Website": {
+          "next_step": "website_requirement",
+          "sub_service": "New Website"
+        },
+        "Redesign My Website": {
+          "next_step": "website_requirement",
+          "sub_service": "Website Redesign"
+        },
+        "E-commerce Website": {
+          "next_step": "website_requirement",
+          "sub_service": "E-commerce Website"
+        },
+        "Website Features / Technology": {
+          "next_step": "website_requirement",
+          "sub_service": "Website Features"
+        },
+        "Other": {
+          "next_step": "website_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "website_development",
+      "type": "menu"
+    },
+    "website_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "website_timeline",
+      "template_id": "website_requirement",
+      "type": "text"
+    },
+    "website_other": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "website_timeline",
+      "template_id": "website_other",
+      "type": "text"
+    },
+    "website_timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "website_timeline",
+      "type": "menu"
+    },
+    "website_pricing": {
+      "options": {
+        "Get an Exact Estimate": {
+          "next_step": "website_requirement",
+          "aliases": [
+            "exact estimate",
+            "estimate",
+            "quote",
+            "get estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "website_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "website_pricing",
+      "type": "menu"
+    },
+    "mobile_app": {
+      "options": {
+        "I Have an App Idea": {
+          "next_step": "mobile_app_idea",
+          "sub_service": "App Idea"
+        },
+        "Android App": {
+          "next_step": "mobile_requirement",
+          "sub_service": "Android App"
+        },
+        "iOS App": {
+          "next_step": "mobile_requirement",
+          "sub_service": "iOS App"
+        },
+        "Cross-Platform App": {
+          "next_step": "mobile_requirement",
+          "sub_service": "Cross-Platform App"
+        },
+        "Existing App / Improvements": {
+          "next_step": "mobile_requirement",
+          "sub_service": "Existing App Improvements"
+        },
+        "Other": {
+          "next_step": "mobile_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "mobile_app",
+      "type": "menu"
+    },
+    "mobile_app_idea": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "mobile_timeline",
+      "template_id": "mobile_app_idea",
+      "type": "text"
+    },
+    "mobile_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "mobile_timeline",
+      "template_id": "mobile_requirement",
+      "type": "text"
+    },
+    "mobile_other": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "mobile_timeline",
+      "template_id": "mobile_other",
+      "type": "text"
+    },
+    "mobile_timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "mobile_timeline",
+      "type": "menu"
+    },
+    "mobile_pricing": {
+      "options": {
+        "Get a Custom Quote": {
+          "next_step": "mobile_requirement",
+          "aliases": [
+            "custom quote",
+            "quote",
+            "estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "mobile_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "mobile_pricing",
+      "type": "menu"
+    },
+    "custom_software": {
+      "options": {
+        "Business Software": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Business Software"
+        },
+        "Process Automation": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Process Automation"
+        },
+        "Custom Features / Platform": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Custom Platform"
+        },
+        "System Integrations": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "System Integrations"
+        },
+        "Internal Tools": {
+          "next_step": "custom_software_requirement",
+          "sub_service": "Internal Tools"
+        },
+        "Other": {
+          "next_step": "custom_software_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "custom_software",
+      "type": "menu"
+    },
+    "custom_software_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "custom_software_timeline",
+      "template_id": "custom_software_requirement",
+      "type": "text"
+    },
+    "custom_software_other": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "custom_software_timeline",
+      "template_id": "custom_software_other",
+      "type": "text"
+    },
+    "custom_software_timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "custom_software_timeline",
+      "type": "menu"
+    },
+    "custom_pricing": {
+      "options": {
+        "Get a Custom Quote": {
+          "next_step": "custom_software_requirement",
+          "aliases": [
+            "custom quote",
+            "quote",
+            "estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "custom_software_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "custom_pricing",
+      "type": "menu"
+    },
+    "ai_automation": {
+      "options": {
+        "AI for My Business": {
+          "next_step": "ai_requirement",
+          "sub_service": "Business AI"
+        },
+        "AI Automation": {
+          "next_step": "ai_requirement",
+          "sub_service": "Workflow Automation"
+        },
+        "AI Lead Generation": {
+          "next_step": "ai_requirement",
+          "sub_service": "Lead Generation AI"
+        },
+        "AI Personalization": {
+          "next_step": "ai_requirement",
+          "sub_service": "AI Personalization"
+        },
+        "AI Chatbot": {
+          "next_step": "chatbot",
+          "sub_service": "AI Chatbot",
+          "service": "AI & Automation",
+          "service_key": "CHATBOT"
+        },
+        "Other": {
+          "next_step": "ai_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "ai_automation",
+      "type": "menu"
+    },
+    "ai_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ai_timeline",
+      "template_id": "ai_requirement",
+      "type": "text"
+    },
+    "ai_other": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ai_timeline",
+      "template_id": "ai_other",
+      "type": "text"
+    },
+    "ai_timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "ai_timeline",
+      "type": "menu"
+    },
+    "ai_pricing": {
+      "options": {
+        "Get a Custom Quote": {
+          "next_step": "ai_requirement",
+          "aliases": [
+            "custom quote",
+            "quote",
+            "estimate"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "ai_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "ai_pricing",
+      "type": "menu"
+    },
+    "chatbot": {
+      "options": {
+        "Website Chatbot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "Website Chatbot",
+          "aliases": [
+            "Website Bot",
+            "Web Bot",
+            "Web Chatbot",
+            "Site Bot"
+          ]
+        },
+        "WhatsApp Chatbot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "WhatsApp Chatbot",
+          "aliases": [
+            "WhatsApp Bot",
+            "WA Bot",
+            "WhatsApp Automation"
+          ]
+        },
+        "Lead Generation Bot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "Lead Generation Bot",
+          "aliases": [
+            "Lead Generation",
+            "Lead Bot",
+            "Lead Gen Bot",
+            "Lead Generation Chatbot"
+          ]
+        },
+        "Customer Support Bot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "Customer Support Bot",
+          "aliases": [
+            "Customer Support",
+            "Support Bot",
+            "Customer Service Bot",
+            "Customer Support Chatbot"
+          ]
+        },
+        "RAG / Knowledge Base Chatbot": {
+          "next_step": "chatbot_requirement",
+          "sub_service": "RAG Chatbot",
+          "aliases": [
+            "RAG",
+            "RAG Bot",
+            "RAG Chatbot",
+            "Knowledge Base Bot",
+            "Knowledge Base Chatbot",
+            "Knowledge Base"
+          ]
+        },
+        "Other": {
+          "next_step": "chatbot_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "chatbot",
+      "type": "menu"
+    },
+    "chatbot_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "chatbot_timeline",
+      "template_id": "chatbot_requirement",
+      "type": "text"
+    },
+    "chatbot_other": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "chatbot_timeline",
+      "template_id": "chatbot_other",
+      "type": "text"
+    },
+    "chatbot_timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "chatbot_timeline",
+      "type": "menu"
+    },
+    "chatbot_pricing": {
+      "options": {
+        "Get a Tailored Quote": {
+          "next_step": "chatbot_requirement",
+          "aliases": [
+            "tailored quote",
+            "quote",
+            "estimate",
+            "get quote"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "chatbot_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "chatbot_pricing",
+      "type": "menu"
+    },
+    "ecommerce": {
+      "options": {
+        "New E-commerce Store": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "New Store"
+        },
+        "Shopify Store": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Shopify Store"
+        },
+        "Existing Store Redesign": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Store Redesign"
+        },
+        "Custom E-commerce Platform": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Custom E-commerce Platform"
+        },
+        "Store Integrations / Automation": {
+          "next_step": "ecommerce_requirement",
+          "sub_service": "Store Integrations"
+        },
+        "Other": {
+          "next_step": "ecommerce_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "ecommerce",
+      "type": "menu"
+    },
+    "ecommerce_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ecommerce_timeline",
+      "template_id": "ecommerce_requirement",
+      "type": "text"
+    },
+    "ecommerce_other": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "ecommerce_timeline",
+      "template_id": "ecommerce_other",
+      "type": "text"
+    },
+    "ecommerce_timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "ecommerce_timeline",
+      "type": "menu"
+    },
+    "ecommerce_pricing": {
+      "options": {
+        "Get an Exact Estimate": {
+          "next_step": "ecommerce_requirement",
+          "aliases": [
+            "exact estimate",
+            "estimate",
+            "quote",
+            "get quote"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "ecommerce_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "ecommerce_pricing",
+      "type": "menu"
+    },
+    "seo_marketing": {
+      "options": {
+        "SEO": {
+          "next_step": "marketing_requirement",
+          "sub_service": "SEO"
+        },
+        "Social Media Marketing": {
+          "next_step": "marketing_requirement",
+          "sub_service": "Social Media Marketing"
+        },
+        "Paid Ads": {
+          "next_step": "marketing_requirement",
+          "sub_service": "Paid Advertising",
+          "aliases": [
+            "Paid Advertising",
+            "PPC",
+            "Google Ads",
+            "Meta Ads"
+          ]
+        },
+        "SEO + Paid Ads": {
+          "next_step": "marketing_requirement",
+          "sub_service": "SEO + Paid Ads"
+        },
+        "Digital Growth Strategy": {
+          "next_step": "marketing_requirement",
+          "sub_service": "Digital Growth Strategy"
+        },
+        "Other": {
+          "next_step": "marketing_other",
+          "sub_service": "Other"
+        },
+        "Back to Services": {
+          "next_step": "services"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "seo_marketing",
+      "type": "menu"
+    },
+    "marketing_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "marketing_timeline",
+      "template_id": "marketing_requirement",
+      "type": "text"
+    },
+    "marketing_other": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "marketing_timeline",
+      "template_id": "marketing_other",
+      "type": "text"
+    },
+    "marketing_timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "marketing_timeline",
+      "type": "menu"
+    },
+    "marketing_pricing": {
+      "options": {
+        "Get a Custom Strategy": {
+          "next_step": "marketing_requirement",
+          "aliases": [
+            "custom strategy",
+            "quote",
+            "estimate",
+            "get strategy"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out"
+          ]
+        },
+        "Share More Project Details": {
+          "next_step": "marketing_requirement"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "marketing_pricing",
+      "type": "menu"
+    },
+    "pricing": {
+      "options": {
+        "Website": {
+          "next_step": "website_pricing",
+          "service": "Website Development",
+          "service_key": "WEBSITE",
+          "intent": "PRICING"
+        },
+        "Mobile App": {
+          "next_step": "mobile_pricing",
+          "service": "Mobile App Development",
+          "service_key": "MOBILE_APP",
+          "intent": "PRICING"
+        },
+        "Custom Software": {
+          "next_step": "custom_pricing",
+          "service": "Custom Software",
+          "service_key": "CUSTOM_SOFTWARE",
+          "intent": "PRICING"
+        },
+        "AI / Automation": {
+          "next_step": "ai_pricing",
+          "service": "AI & Automation",
+          "service_key": "AI_AUTOMATION",
+          "intent": "PRICING"
+        },
+        "AI Chatbot": {
+          "next_step": "chatbot_pricing",
+          "service": "AI Chatbot Development",
+          "service_key": "CHATBOT",
+          "intent": "PRICING"
+        },
+        "E-commerce": {
+          "next_step": "ecommerce_pricing",
+          "service": "E-commerce / Shopify",
+          "service_key": "SHOPIFY_ECOMMERCE",
+          "intent": "PRICING"
+        },
+        "SEO / Marketing": {
+          "next_step": "marketing_pricing",
+          "service": "SEO & Digital Marketing",
+          "service_key": "SEO",
+          "intent": "PRICING"
+        },
+        "Other": {
+          "next_step": "generic_requirement",
+          "intent": "PRICING"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "pricing",
+      "type": "menu"
+    },
+    "generic_requirement": {
+      "input_type": "text",
+      "collects": "requirement",
+      "next_step": "timeline",
+      "template_id": "generic_requirement",
+      "type": "text"
+    },
+    "timeline": {
+      "collects": "timeline",
+      "next_step": "talk_to_team",
+      "options": {
+        "Immediately": {
+          "next_step": "talk_to_team",
+          "timeline": "Immediately",
+          "aliases": [
+            "asap",
+            "as soon as possible",
+            "right away",
+            "now",
+            "urgent",
+            "urgently",
+            "immediately",
+            "this week"
+          ]
+        },
+        "Within 1 Month": {
+          "next_step": "talk_to_team",
+          "timeline": "Within 1 Month",
+          "aliases": [
+            "this month",
+            "next month",
+            "in a month",
+            "within 1 month",
+            "1 month",
+            "few weeks",
+            "2 weeks",
+            "3 weeks"
+          ]
+        },
+        "1–3 Months": {
+          "next_step": "talk_to_team",
+          "timeline": "1–3 Months",
+          "aliases": [
+            "1-3 months",
+            "2 months",
+            "3 months",
+            "two months",
+            "three months",
+            "couple of months",
+            "next quarter"
+          ]
+        },
+        "Exploring": {
+          "next_step": "talk_to_team",
+          "timeline": "Exploring",
+          "aliases": [
+            "just exploring",
+            "exploring",
+            "not sure",
+            "no rush",
+            "researching",
+            "just looking",
+            "flexible"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "timeline",
+      "type": "menu"
+    },
+    "talk_to_team": {
+      "options": {
+        "Get an Estimate": {
+          "next_step": "pricing",
+          "use_service_context": "pricing_step",
+          "intent": "PRICING",
+          "aliases": [
+            "estimate",
+            "an estimate",
+            "quote",
+            "a quote"
+          ]
+        },
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "book",
+            "discovery call",
+            "meeting"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "email me",
+            "reach out to me",
+            "call me back"
+          ]
+        },
+        "Share Project Details First": {
+          "next_step": "generic_requirement",
+          "use_service_context": "requirement_step",
+          "aliases": [
+            "share details",
+            "share project details",
+            "give details",
+            "project details",
+            "share more project details"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "talk_to_team",
+      "type": "menu"
+    },
+    "booking": {
+      "action": "BOOK_CALL",
+      "input_type": "text",
+      "collects": "booking_slot",
+      "next_step": "booking_confirmed",
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "booking",
+      "type": "text"
+    },
+    "booking_confirmed": {
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "booking_confirmed",
+      "type": "menu"
+    },
+    "human_handoff": {
+      "action": "HUMAN_HANDOFF",
+      "input_type": "text",
+      "collects": "contact_info",
+      "next_step": "handoff_confirmed",
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "human_handoff",
+      "type": "text"
+    },
+    "handoff_confirmed": {
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "handoff_confirmed",
+      "type": "menu"
+    },
+    "portfolio": {
+      "options": {
+        "E-commerce": {
+          "next_step": "portfolio_ecommerce"
+        },
+        "Website": {
+          "next_step": "portfolio_website"
+        },
+        "Mobile App": {
+          "next_step": "portfolio_mobile"
+        },
+        "Custom Platform": {
+          "next_step": "portfolio_custom"
+        },
+        "AI / Automation": {
+          "next_step": "portfolio_ai"
+        },
+        "Other": {
+          "next_step": "rag_mode"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "portfolio",
+      "type": "menu"
+    },
+    "portfolio_ecommerce": {
+      "options": {
+        "Discuss My Project": {
+          "next_step": "ecommerce",
+          "service": "E-commerce / Shopify",
+          "service_key": "SHOPIFY_ECOMMERCE"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "portfolio_ecommerce",
+      "type": "menu"
+    },
+    "portfolio_website": {
+      "options": {
+        "Discuss My Project": {
+          "next_step": "website_development",
+          "service": "Website Development",
+          "service_key": "WEBSITE"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "portfolio_website",
+      "type": "menu"
+    },
+    "portfolio_mobile": {
+      "options": {
+        "Discuss My Project": {
+          "next_step": "mobile_app",
+          "service": "Mobile App Development",
+          "service_key": "MOBILE_APP"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "portfolio_mobile",
+      "type": "menu"
+    },
+    "portfolio_custom": {
+      "options": {
+        "Discuss My Project": {
+          "next_step": "custom_software",
+          "service": "Custom Software",
+          "service_key": "CUSTOM_SOFTWARE"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "portfolio_custom",
+      "type": "menu"
+    },
+    "portfolio_ai": {
+      "options": {
+        "Discuss My Project": {
+          "next_step": "ai_automation",
+          "service": "AI & Automation",
+          "service_key": "AI_AUTOMATION"
+        },
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "portfolio_ai",
+      "type": "menu"
+    },
+    "rag_mode": {
+      "input_type": "rag",
+      "options": {
+        "Talk to Our Team": {
+          "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "rag_mode",
+      "type": "rag"
+    },
+    "exact_estimate": {
+      "options": {
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call",
+            "book"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out",
+            "email me"
+          ]
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "exact_estimate",
+      "type": "menu"
+    },
+    "completed": {
+      "options": {
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      },
+      "template_id": "completed",
+      "type": "menu"
+    }
+  }
+}

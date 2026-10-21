@@ -157,7 +157,7 @@ class MetaMessagingChannel:
     ) -> dict[str, Any]:
         if not self.is_configured:
             logger.error(
-                "%s credentials are not configured; reply to recipient %s was NOT sent.",
+                "%s credentials are not configured (access token missing or placeholder); reply to recipient %s was NOT sent.",
                 self.display_name, recipient_id,
             )
             return {"error": "channel_not_configured", "status_code": 503}

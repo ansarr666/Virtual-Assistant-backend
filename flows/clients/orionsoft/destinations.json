@@ -1,0 +1,11 @@
+{
+  "destinations": {
+    "users": "users",
+    "conversations": "conversations",
+    "messages": "messages",
+    "conversation_state": "conversation_state",
+    "qualification_answers": "conversation_state",
+    "booking_records": "conversation_state",
+    "human_handoff_records": "conversation_state"
+  }
+}

@@ -14,15 +14,30 @@ logger = logging.getLogger(__name__)
 # Columns each worksheet must have. Values are written by header name, so existing
 # column order is respected; missing columns are appended to the header row on first use.
 SHEET_COLUMNS: dict[str, list[str]] = {
-    "users": ["tenant_id", "user_id", "name", "phone", "email", "channel", "created_at"],
-    "conversations": ["tenant_id", "conversation_id", "user_id", "channel", "status", "started_at", "updated_at"],
-    "messages": ["tenant_id", "message_id", "conversation_id", "sender", "message", "timestamp", "client_message_id"],
+    "leads": [
+        "created_at", "name", "phone", "email", "channel",
+        "service", "requirements", "budget", "timeline", "booking_slot", "status",
+        "lead_id", "conversation_id", "tenant_id", "user_id",
+    ],
+    "conversations": [
+        "started_at", "channel", "name", "status", "current_step", "updated_at",
+        "conversation_id", "tenant_id", "user_id",
+    ],
+    "users": [
+        "created_at", "name", "phone", "email", "channel", "total_conversations",
+        "user_id", "tenant_id", "active_conversation_id",
+    ],
+    "messages": [
+        "timestamp", "channel", "sender", "message", "conversation_id", "tenant_id", "client_message_id",
+    ],
     "conversation_state": [
-        "tenant_id", "conversation_id", "current_flow", "current_step", "intent", "status", "updated_at",
-        "service", "sub_service", "service_key", "requirements", "timeline", "budget", "name", "email",
-        "phone", "existing_url", "platform", "booking_slot", "contact_info",
+        "updated_at", "current_step", "status", "service", "service_key", "requirements", "timeline", "name", "phone", "email",
+        "conversation_id", "tenant_id",
     ],
 }
+SHEET_COLUMNS["master sheet"] = SHEET_COLUMNS["leads"]
+SHEET_COLUMNS["master"] = SHEET_COLUMNS["leads"]
+
 
 
 def _wrap_errors(operation: str):
@@ -71,22 +86,51 @@ class GoogleSheetRepository(LeadRepository):
         self._state_cache: dict[tuple[str, str], dict] = {}
         self._state_rows: dict[tuple[str, str], int] = {}
         self._states_loaded = False
+        self._user_cache: dict[tuple[str, str], dict] = {}
+        self._user_rows: dict[tuple[str, str], int] = {}
+        self._users_loaded = False
+        self._lead_cache: dict[tuple[str, str], dict] = {}
+        self._lead_rows: dict[tuple[str, str], int] = {}
+        self._leads_loaded = False
         self.idempotent_responses: dict[tuple[str, str, str], dict] = {}
 
     # ------------------------------------------------------------------
     # Worksheet / header helpers
     # ------------------------------------------------------------------
-    def get_worksheet(self, name: str = "Leads"):
-        if name in self._worksheet_cache:
-            return self._worksheet_cache[name]
+    def get_worksheet(self, name: str | None = None):
+        target_name = name or os.getenv("GOOGLE_SHEET_NAME", "Leads")
+        key = target_name.lower()
+        if key in self._worksheet_cache:
+            return self._worksheet_cache[key]
 
         if self.client:
             spreadsheet = self.client.open_by_key(os.getenv("GOOGLE_SHEET_ID", "sheet-123"))
-            ws = spreadsheet.worksheet(name)
         else:
-            ws = get_worksheet(name)
+            spreadsheet = get_spreadsheet()
 
-        self._worksheet_cache[name] = ws
+        ws = None
+        if hasattr(spreadsheet, "worksheets"):
+            try:
+                ws_map = {w.title.lower(): w for w in spreadsheet.worksheets()}
+                if key in ws_map:
+                    ws = ws_map[key]
+                else:
+                    cols = max(len(SHEET_COLUMNS.get(key, [])), 20)
+                    ws = spreadsheet.add_worksheet(title=target_name, rows=1000, cols=cols)
+                    headers = SHEET_COLUMNS.get(key, [])
+                    if headers:
+                        ws.update([headers], f"A1:{_col_letter(len(headers))}1")
+                    logger.info("Google Sheets: auto-created worksheet '%s'", target_name)
+            except Exception as e:
+                logger.warning("Could not list or create worksheet '%s': %s", target_name, e)
+
+        if ws is None:
+            try:
+                ws = spreadsheet.worksheet(target_name)
+            except Exception as e:
+                raise RepositoryError(f"Could not open worksheet '{target_name}': {e}") from e
+
+        self._worksheet_cache[key] = ws
         return ws
 
     def _get_headers(self, name: str) -> list[str]:
@@ -136,9 +180,71 @@ class GoogleSheetRepository(LeadRepository):
     # ------------------------------------------------------------------
     # LeadRepository API
     # ------------------------------------------------------------------
+    @_wrap_errors("load users")
+    def _load_users(self):
+        if self._users_loaded:
+            return
+        for row_number, record in self._read_records("users"):
+            key = (record.get("tenant_id") or "", record.get("user_id") or "")
+            self._user_cache[key] = record
+            self._user_rows[key] = row_number
+        self._users_loaded = True
+
     @_wrap_errors("save_user")
     def save_user(self, data: dict):
-        self._append("users", data)
+        key = (data.get("tenant_id", ""), data.get("user_id", ""))
+        with self._lock:
+            self._load_users()
+            merged = {**self._user_cache.get(key, {}), **data}
+            row_number = self._user_rows.get(key)
+            if row_number:
+                self._update_row("users", row_number, merged)
+            else:
+                row_number = self._append("users", merged)
+                if row_number:
+                    self._user_rows[key] = row_number
+            self._user_cache[key] = merged
+
+    @_wrap_errors("get_user")
+    def get_user(self, tenant_id: str, user_id: str):
+        key = (tenant_id, user_id)
+        with self._lock:
+            self._load_users()
+            user = self._user_cache.get(key)
+            return dict(user) if user else None
+
+    @_wrap_errors("load leads")
+    def _load_leads(self):
+        if self._leads_loaded:
+            return
+        for row_number, record in self._read_records("leads"):
+            key = (record.get("tenant_id") or "", record.get("lead_id") or "")
+            self._lead_cache[key] = record
+            self._lead_rows[key] = row_number
+        self._leads_loaded = True
+
+    @_wrap_errors("save_lead")
+    def save_lead(self, data: dict):
+        key = (data.get("tenant_id", ""), data.get("lead_id", ""))
+        with self._lock:
+            self._load_leads()
+            merged = {**self._lead_cache.get(key, {}), **data}
+            row_number = self._lead_rows.get(key)
+            if row_number:
+                self._update_row("leads", row_number, merged)
+            else:
+                row_number = self._append("leads", merged)
+                if row_number:
+                    self._lead_rows[key] = row_number
+            self._lead_cache[key] = merged
+
+    @_wrap_errors("get_lead")
+    def get_lead(self, tenant_id: str, lead_id: str):
+        key = (tenant_id, lead_id)
+        with self._lock:
+            self._load_leads()
+            lead = self._lead_cache.get(key)
+            return dict(lead) if lead else None
 
     @_wrap_errors("load conversations")
     def _load_conversations(self):
@@ -243,9 +349,12 @@ class GoogleSheetRepository(LeadRepository):
             self.check_ready()
             self._load_conversations()
             self._load_states()
+            self._load_users()
+            self._load_leads()
         logger.info(
-            "Google Sheets warm-up done in %.2fs (%d conversations, %d states cached)",
+            "Google Sheets warm-up done in %.2fs (%d conversations, %d states, %d users, %d leads cached)",
             time.perf_counter() - t0, len(self._conversation_cache), len(self._state_cache),
+            len(self._user_cache), len(self._lead_cache),
         )
 
 

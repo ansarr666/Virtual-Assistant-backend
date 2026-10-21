@@ -5,7 +5,7 @@ from typing import Any
 from fastapi import APIRouter, BackgroundTasks, Request, Query, HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
 
-import app.config  # noqa: F401  (loads .env)
+from app.config import get_settings
 from app.api.meta_webhook import (  # noqa: F401
     _first_time_seen,
     _process_events,
@@ -20,7 +20,9 @@ router = APIRouter(
     tags=["WhatsApp"]
 )
 
-VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN") or os.getenv("META_VERIFY_TOKEN")
+
+def _get_verify_token() -> str:
+    return os.getenv("WHATSAPP_VERIFY_TOKEN") or get_settings().META_VERIFY_TOKEN
 
 
 # Meta uses this once to verify our webhook
@@ -30,10 +32,11 @@ def verify_webhook(
     hub_verify_token: str = Query(alias="hub.verify_token"),
     hub_challenge: str = Query(alias="hub.challenge")
 ):
+    token = _get_verify_token()
     if (
-        VERIFY_TOKEN
+        token
         and hub_mode == "subscribe"
-        and hub_verify_token == VERIFY_TOKEN
+        and hub_verify_token == token
     ):
         return PlainTextResponse(
             content=hub_challenge

@@ -4,19 +4,40 @@ from unittest.mock import MagicMock, patch
 import httpx
 from httpx import ASGITransport, AsyncClient
 
-from app.main import app
+from app.models.schemas import ChatRequest
 from app.repositories.in_memory import InMemoryLeadRepository
 from app.services import orchestrator
 from app.services.knowledge_service import FALLBACK_UNSUPPORTED_REPLY
+
+
+class MockChatResponse:
+    def __init__(self, data):
+        self.status_code = 200
+        self._data = data
+
+    def json(self):
+        return self._data
+
+
+class MockChatClient:
+    async def post(self, url, json=None, **kwargs):
+        payload = json or {}
+        req = ChatRequest(
+            tenant_id=payload.get("tenant_id", "client_001"),
+            user_id=payload.get("user_id", "default_user"),
+            message=payload.get("message", ""),
+            channel=payload.get("channel", "whatsapp"),
+            client_message_id=payload.get("client_message_id"),
+        )
+        res = orchestrator.process_message(req)
+        return MockChatResponse(res)
 
 
 @pytest_asyncio.fixture
 async def chat_client():
     in_mem_repo = InMemoryLeadRepository()
     orchestrator.set_repository(in_mem_repo)
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as test_client:
-        yield test_client
+    return MockChatClient()
 
 
 # ======================================================================

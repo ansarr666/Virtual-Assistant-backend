@@ -1,0 +1,33 @@
+{
+  "tenant_id": "client_001",
+  "company_name": "OrionSoft Technologies",
+  "flow_id": "orionsoft_lead_gen",
+  "version": "1.0.0",
+  "default_language": "en",
+  "status": "active",
+  "knowledge_base": "orionsoft",
+  "enabled_features": [
+    "rag",
+    "booking",
+    "human_handoff",
+    "lead_capture"
+  ],
+  "rag": {
+    "enabled": true,
+    "base_url_env": "RAG_API_BASE_URL",
+    "endpoint": "/api/public/conversation",
+    "timeout_seconds": 10.0
+  },
+  "booking": {
+    "enabled": true,
+    "action": "BOOK_CALL"
+  },
+  "human_handoff": {
+    "enabled": true,
+    "action": "HUMAN_HANDOFF"
+  },
+  "destinations_ref": "destinations.json",
+  "templates_ref": "templates.json",
+  "steps_ref": "steps.json",
+  "flow_ref": "flow.json"
+}

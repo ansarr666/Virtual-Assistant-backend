@@ -1,55 +1,45 @@
-import pytest_asyncio
+import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
+from app.models.schemas import ChatRequest
 from app.repositories.in_memory import InMemoryLeadRepository
 from app.services import orchestrator
 
 
-@pytest_asyncio.fixture
-async def client():
+@pytest.fixture(autouse=True)
+def clean_repo():
     in_mem_repo = InMemoryLeadRepository()
     orchestrator.set_repository(in_mem_repo)
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as test_client:
-        yield test_client
+    yield in_mem_repo
 
 
-async def test_greeting_returns_welcome_and_options(client):
-    response = await client.post(
-        "/chat",
-        json={"tenant_id": "client_001", "user_id": "user-1", "message": "  HELLO  "},
+def test_greeting_returns_welcome_and_options():
+    response = orchestrator.process_message(
+        ChatRequest(tenant_id="client_001", user_id="user-1", message="  HELLO  ", channel="whatsapp")
     )
-
-    assert response.status_code == 200
-    data = response.json()
-    assert "Welcome to OrionSoft Technologies" in data["reply"]
-    assert "Our Services" in data["options"]
-    assert "Pricing & Estimates" in data["options"]
+    assert "Welcome to OrionSoft Technologies" in response["reply"]
+    assert "Our Services" in response["options"]
+    assert "Pricing & Estimates" in response["options"]
 
 
-async def test_unrecognized_message_returns_clarification(client):
-    response = await client.post(
-        "/chat",
-        json={"tenant_id": "client_001", "user_id": "user-1", "message": "random_gibberish_9988"},
+def test_unrecognized_message_returns_clarification():
+    response = orchestrator.process_message(
+        ChatRequest(tenant_id="client_001", user_id="user-1", message="random_gibberish_9988", channel="whatsapp")
     )
-
-    assert response.status_code == 200
-    data = response.json()
-    assert "not sure I understood" in data["reply"]
-    assert "Our Services" in data["options"]
-    assert "Main Menu" in data["options"]
+    assert "not sure I understood" in response["reply"]
+    assert "Our Services" in response["options"]
+    assert "Main Menu" in response["options"]
 
 
-async def test_conversation_state_is_saved_per_tenant_and_user(client):
-    await client.post(
-        "/chat",
-        json={
-            "tenant_id": "client_001",
-            "user_id": "user-1",
-            "message": "hi",
-            "channel": "whatsapp",
-        },
+def test_conversation_state_is_saved_per_tenant_and_user():
+    orchestrator.process_message(
+        ChatRequest(
+            tenant_id="client_001",
+            user_id="user-1",
+            message="hi",
+            channel="whatsapp",
+        )
     )
 
     state = orchestrator.repo.get_state("client_001", "conv_user-1")
@@ -62,8 +52,9 @@ async def test_conversation_state_is_saved_per_tenant_and_user(client):
     assert conv["channel"] == "whatsapp"
 
 
-async def test_root_health_check(client):
-    response = await client.get("/")
-
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+async def test_root_health_check():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as test_client:
+        response = await test_client.get("/")
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok"}

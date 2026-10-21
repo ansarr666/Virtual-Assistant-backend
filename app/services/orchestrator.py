@@ -34,12 +34,16 @@ from app.repositories.base import LeadRepository, RepositoryError
 from app.repositories.google_sheet import GoogleSheetRepository
 from app.repositories.in_memory import InMemoryLeadRepository
 from app.services.flow_service import TERMINAL_STEP, load_flow
+from app.services.template_service import template_service
+from app.services.destination_service import destination_service
+from app.services.conversation_state_service import conversation_state_service
 from app.services import llm
 from app.services.intent_service import (
     classify_global_intent,
     classify_intent_deterministic,
     detect_chitchat,
     detect_global_command,
+    detect_guardrail_violation,
     detect_handoff_command,
     detect_service,
     is_acknowledgement,
@@ -71,7 +75,12 @@ __all__ = [
 
 
 def _default_repository() -> LeadRepository:
-    backend = get_settings().REPOSITORY_BACKEND.strip().lower()
+    settings = get_settings()
+    if settings.GOOGLE_APPS_SCRIPT_URL:
+        from app.repositories.apps_script import AppsScriptRepository
+        logger.info("Using Google Apps Script webhook repository: %s", settings.GOOGLE_APPS_SCRIPT_URL[:60])
+        return AppsScriptRepository(settings.GOOGLE_APPS_SCRIPT_URL, async_writes=True)
+    backend = settings.REPOSITORY_BACKEND.strip().lower()
     if backend == "memory":
         logger.warning("REPOSITORY_BACKEND=memory: conversations are NOT persisted to Google Sheets.")
         return InMemoryLeadRepository()
@@ -173,10 +182,162 @@ def process_message(data: Any) -> dict[str, Any]:
     t_start = time.perf_counter()
     tenant_id = (getattr(data, "tenant_id", "") or "").strip()
     user_id = (getattr(data, "user_id", "") or "").strip() or "default_user"
-    conversation_id = f"conv_{user_id}"
     message = (getattr(data, "message", "") or "").strip()
-    channel = getattr(data, "channel", "web") or "web"
+    channel = getattr(data, "channel", "whatsapp") or "whatsapp"
     client_message_id = (getattr(data, "client_message_id", None) or "").strip()
+
+    # Manage user tracking and conversation isolation
+    user_record = destination_service.get_user(tenant_id, user_id)
+    is_restart_cmd = message.lower() in ("start over", "restart", "start new conversation", "start new", "new conversation")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    if user_record and user_record.get("active_conversation_id"):
+        curr_conv_id = user_record["active_conversation_id"]
+        total_convs = int(user_record.get("total_conversations") or 1)
+        if is_restart_cmd:
+            total_convs += 1
+            # Mark previous conversation as restarted so old data is not overwritten
+            destination_service.save_conversation(tenant_id, {
+                "tenant_id": tenant_id,
+                "conversation_id": curr_conv_id,
+                "status": "restarted",
+                "updated_at": now_iso,
+            })
+            conversation_id = f"conv_{user_id}_{int(time.time() * 1000)}"
+            destination_service.save_conversation(tenant_id, {
+                "tenant_id": tenant_id,
+                "conversation_id": conversation_id,
+                "user_id": user_id,
+                "channel": channel,
+                "session_number": total_convs,
+                "user_type": "RETURNING",
+                "status": "active",
+                "current_step": "welcome",
+                "started_at": now_iso,
+                "updated_at": now_iso,
+            })
+            destination_service.save_user(tenant_id, {
+                "tenant_id": tenant_id,
+                "user_id": user_id,
+                "channel": channel,
+                "user_type": "RETURNING",
+                "is_returning": True,
+                "total_conversations": total_convs,
+                "active_conversation_id": conversation_id,
+                "updated_at": now_iso,
+            })
+            message = ""  # Presents fresh welcome on fresh conversation
+        else:
+            conversation_id = curr_conv_id
+            destination_service.save_user(tenant_id, {
+                "tenant_id": tenant_id,
+                "user_id": user_id,
+                "channel": channel,
+                "user_type": "RETURNING" if user_record.get("is_returning") else "NEW",
+                "is_returning": user_record.get("is_returning", False),
+                "total_conversations": total_convs,
+                "active_conversation_id": conversation_id,
+                "updated_at": now_iso,
+            })
+    else:
+        conversation_id = f"conv_{user_id}"
+        destination_service.save_user(tenant_id, {
+            "tenant_id": tenant_id,
+            "user_id": user_id,
+            "channel": channel,
+            "user_type": "NEW",
+            "is_returning": False,
+            "total_conversations": 1,
+            "active_conversation_id": conversation_id,
+            "created_at": now_iso,
+            "updated_at": now_iso,
+        })
+        destination_service.save_conversation(tenant_id, {
+            "tenant_id": tenant_id,
+            "conversation_id": conversation_id,
+            "user_id": user_id,
+            "channel": channel,
+            "session_number": 1,
+            "user_type": "NEW",
+            "status": "active",
+            "current_step": "welcome",
+            "started_at": now_iso,
+            "updated_at": now_iso,
+        })
+
+    # Check for returning user with an ongoing conversation
+    prev_state = destination_service.get_state(tenant_id, conversation_id) or {}
+    prev_step = prev_state.get("current_step")
+    prev_status = prev_state.get("status") or "active"
+
+    if prev_state.get("awaiting_resume_choice"):
+        norm_msg = message.strip().lower()
+        if any(w in norm_msg for w in ("continue", "resume", "yes", "pick up", "keep")):
+            destination_service.save_state(tenant_id, {
+                **prev_state,
+                "awaiting_resume_choice": False,
+            })
+            tenant_cfg = get_tenant(tenant_id)
+            flow = load_flow(tenant_cfg.get("flow", "orionsoft_flow.json"))
+            step = flow["steps"].get(prev_step) or flow["steps"].get("welcome")
+            res = build_response(step, state=prev_state, templates=flow.get("templates") or {})
+            res["reply"] = f"Welcome back! Picking up right where we left off:\n\n{res['reply']}"
+            res["current_step"] = prev_step
+            res["conversation_status"] = prev_status
+            return _finalize(res, client_message_id)
+        elif any(w in norm_msg for w in ("new", "start over", "restart", "start new", "no")):
+            destination_service.save_conversation(tenant_id, {
+                "tenant_id": tenant_id,
+                "conversation_id": conversation_id,
+                "status": "restarted",
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            })
+            conversation_id = f"conv_{user_id}_{int(time.time() * 1000)}"
+            destination_service.save_user(tenant_id, {
+                "tenant_id": tenant_id,
+                "user_id": user_id,
+                "active_conversation_id": conversation_id,
+                "is_returning": True,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            })
+            message = ""
+
+    # Check if returning user is starting a fresh session (idle timeout or explicit flag)
+    prev_updated = prev_state.get("updated_at")
+    is_returning_start = getattr(data, "is_new_session", False)
+    if not is_returning_start and prev_updated:
+        try:
+            prev_dt = datetime.fromisoformat(prev_updated)
+            if (datetime.now(timezone.utc) - prev_dt).total_seconds() > 600:
+                is_returning_start = True
+        except Exception:
+            pass
+
+    if (
+        user_record
+        and user_record.get("is_returning")
+        and is_returning_start
+        and prev_status == "active"
+        and prev_step not in (None, "welcome")
+        and detect_global_command(message) == "START"
+    ):
+        destination_service.save_state(tenant_id, {
+            **prev_state,
+            "awaiting_resume_choice": True,
+        })
+        service_name = prev_state.get("service") or "our services"
+        return _finalize({
+            "reply": (
+                f"Welcome back! You have an unfinished enquiry about {service_name} in progress.\n\n"
+                "Would you like to continue from where you left off, or start a new conversation?"
+            ),
+            "options": ["Continue", "Start New Conversation"],
+            "mode": "menu",
+            "intent": "RESUME_CHOICE",
+            "conversation_status": "active",
+            "current_step": prev_step,
+        }, client_message_id)
+
     tag = f"[chat tenant={tenant_id} conv={conversation_id} cmid={client_message_id or '-'}]"
 
     logger.info("%s request received: user=%s channel=%s message=%r", tag, user_id, channel, message[:200])
@@ -238,8 +399,7 @@ def _get_cached_response(tenant_id: str, conversation_id: str, client_message_id
         if cached is not None:
             _idempotency_cache.move_to_end(key)
             return dict(cached)
-    stored = repo.get_idempotent_response(tenant_id, conversation_id, client_message_id) \
-        if hasattr(repo, "get_idempotent_response") else None
+    stored = destination_service.get_idempotent_response(tenant_id, conversation_id, client_message_id)
     return dict(stored) if stored else None
 
 
@@ -250,8 +410,7 @@ def _store_cached_response(tenant_id: str, conversation_id: str, client_message_
         _idempotency_cache.move_to_end(key)
         while len(_idempotency_cache) > _IDEMPOTENCY_MAX:
             _idempotency_cache.popitem(last=False)
-    if hasattr(repo, "save_idempotent_response"):
-        repo.save_idempotent_response(tenant_id, conversation_id, client_message_id, response)
+    destination_service.save_idempotent_response(tenant_id, conversation_id, client_message_id, response)
 
 
 def _finalize(response: dict[str, Any], client_message_id: str) -> dict[str, Any]:
@@ -287,6 +446,8 @@ class _Turn:
         self.tag = tag
         self.flow: dict[str, Any] = {}
         self.steps: dict[str, Any] = {}
+        self.templates: dict[str, Any] = {}
+        self.destinations: dict[str, str] = {}
         self.tenant: dict[str, Any] = {}
         self.state: dict[str, Any] = {}
         self.current_step_name: str | None = None
@@ -296,6 +457,9 @@ class _Turn:
 
     def log(self, msg: str, *args) -> None:
         logger.info("%s " + msg, self.tag, *args)
+
+    def get_template_text(self, template_id: str, default: str | None = None) -> str:
+        return template_service.get_template_text(self.templates, template_id, default=default)
 
     # -- setup ---------------------------------------------------------
     def run(self) -> dict[str, Any]:
@@ -310,17 +474,24 @@ class _Turn:
 
         t0 = time.perf_counter()
         try:
-            self.flow = load_flow(tenant["flow"])
+            self.flow = load_flow(tenant.get("flow", self.tenant_id))
         except Exception as e:
             logger.error("%s flow '%s' could not be loaded: %s", self.tag, tenant.get("flow"), e)
-            return {"reply": SAFE_RECOVERY_REPLY, "options": [], "mode": "recovery", "conversation_status": "active"}
+            return {
+                "reply": self.get_template_text("safe_recovery", SAFE_RECOVERY_REPLY),
+                "options": [],
+                "mode": "recovery",
+                "conversation_status": "active",
+            }
         self.steps = self.flow["steps"]
+        self.templates = self.flow.get("templates") or {}
+        self.destinations = self.flow.get("destinations") or {}
         self.log("flow loaded: %s in %.3fs", self.flow.get("flow_id"), time.perf_counter() - t0)
 
         t0 = time.perf_counter()
-        conversation = repo.get_conversation(self.tenant_id, self.conversation_id)
+        conversation = destination_service.get_conversation(self.tenant_id, self.conversation_id, self.destinations)
         if not conversation:
-            repo.save_conversation({
+            destination_service.save_conversation(self.tenant_id, {
                 "tenant_id": self.tenant_id,
                 "conversation_id": self.conversation_id,
                 "user_id": self.user_id,
@@ -328,8 +499,8 @@ class _Turn:
                 "status": "active",
                 "started_at": self.now,
                 "updated_at": self.now,
-            })
-        self.state = dict(repo.get_state(self.tenant_id, self.conversation_id) or {})
+            }, self.destinations)
+        self.state = dict(destination_service.get_state(self.tenant_id, self.conversation_id, self.destinations) or {})
         self.current_step_name = self.state.get("current_step")
         self.current_step = self.steps.get(self.current_step_name) or {}
         self.log(
@@ -346,6 +517,21 @@ class _Turn:
         if display:
             response["display_labels"] = display
         self.persist_messages(response)
+        user_rec = destination_service.get_user(self.tenant_id, self.user_id) or {}
+        destination_service.save_user(self.tenant_id, {
+            "tenant_id": self.tenant_id,
+            "user_id": self.user_id,
+            "channel": self.channel,
+            "user_type": user_rec.get("user_type") or "RETURNING",
+            "is_returning": True,
+            "total_conversations": user_rec.get("total_conversations") or 1,
+            "active_conversation_id": self.conversation_id,
+            "name": self.state.get("name") or user_rec.get("name"),
+            "email": self.state.get("email") or user_rec.get("email"),
+            "phone": self.state.get("phone") or user_rec.get("phone"),
+            "created_at": user_rec.get("created_at") or self.now,
+            "updated_at": self.now,
+        }, self.destinations)
         return response
 
     def persist_messages(self, response: dict[str, Any]) -> None:
@@ -353,6 +539,8 @@ class _Turn:
         base = {
             "tenant_id": self.tenant_id,
             "conversation_id": self.conversation_id,
+            "user_id": self.user_id,
+            "channel": self.channel,
             "client_message_id": self.client_message_id,
         }
         messages = [
@@ -360,12 +548,7 @@ class _Turn:
             {**base, "message_id": str(uuid4()), "sender": "assistant", "message": response.get("reply", ""),
              "timestamp": datetime.now(timezone.utc).isoformat()},
         ]
-        save_many = getattr(repo, "save_messages", None)
-        if callable(save_many):
-            save_many(messages)
-        else:
-            for m in messages:
-                repo.save_message(m)
+        destination_service.save_messages(self.tenant_id, messages, self.destinations)
         self.log("messages persisted in %.3fs", time.perf_counter() - t0)
 
     # -- flow helpers --------------------------------------------------
@@ -393,6 +576,14 @@ class _Turn:
                 if name == svc.get("service") or name in svc.get("aliases", []):
                     return k
         return None
+
+    def _pricing_step_names(self) -> set[str]:
+        steps = {s.get("pricing_step") for s in self.services().values() if s.get("pricing_step")}
+        pricing_route = self.flow.get("routes", {}).get("PRICING")
+        if pricing_route:
+            steps.add(pricing_route)
+        steps.add("pricing")
+        return steps
 
     def resolvable(self, label: str) -> bool:
         return label in self.flow.get("global_options", {}) or label in self.current_step.get("options", {})
@@ -498,6 +689,21 @@ class _Turn:
 
     def handle_deterministic(self) -> dict[str, Any] | None:
         msg = self.message
+
+        # Check guardrail violations first
+        guardrail = detect_guardrail_violation(msg)
+        if guardrail:
+            self.log("guardrail violation intercepted: %s", guardrail["type"])
+            self.next_step_name = self.current_step_name
+            return {
+                "reply": guardrail["reply"],
+                "options": guardrail.get("options", ["Explore Services", "Talk to Team", "Main Menu"]),
+                "mode": "guardrail",
+                "intent": "GUARDRAIL",
+                "conversation_status": self.state.get("status") or "active",
+                "current_step": self.current_step_name,
+            }
+
         handoff = detect_handoff_command(msg)
         if handoff:
             routed = self.handle_handoff(handoff)
@@ -511,9 +717,17 @@ class _Turn:
 
         intent = classify_intent_deterministic(msg)
         if intent:
-            self.log("deterministic intent: %s service=%s buying=%s", intent.intent, intent.service_key,
-                     intent.is_buying_intent)
-            return self.handle_intent(intent)
+            if (
+                self.current_step.get("options")
+                and intent.service_key
+                and intent.service_key == self.service_key_for(self.state)
+                and not intent.is_buying_intent
+            ):
+                self.log("suppressing deterministic re-entry into current service menu: %s", intent.service_key)
+            else:
+                self.log("deterministic intent: %s service=%s buying=%s", intent.intent, intent.service_key,
+                         intent.is_buying_intent)
+                return self.handle_intent(intent)
         return None
 
     def handle_intent(self, intent) -> dict[str, Any] | None:
@@ -587,12 +801,34 @@ class _Turn:
             detail = self.requirement_detail(self.message)
             if detail:
                 self.log("buying intent %s with requirement detail -> captured", key)
+                req_val = f"{self.state['requirements']}; {self.message}" if self.state.get("requirements") else self.message
+                clean_req = self.message.strip().strip('"\'')
+                clean_req = re.sub(r'^(?:i\s+(?:also\s+)?(?:want|need|require|would\s+like)\s+(?:to\s+have\s+)?|we\s+(?:also\s+)?(?:want|need|require)\s+)', '', clean_req, flags=re.I).strip()
+                if self.state.get("requirements"):
+                    prefix = f"Great, I've noted that additional requirement: {clean_req}."
+                else:
+                    prefix = f"Great, I've noted your requirement: {clean_req}."
                 return self.go_to(
-                    svc["requirement_step"], intent=key, requirements=self.message,
-                    prefix=f"Great, I've noted your requirement: \"{self.message}\".", **updates,
+                    svc["requirement_step"], intent=key, requirements=req_val,
+                    prefix=prefix, **updates,
                 )
             return self.go_to(svc["requirement_step"], intent=key, **updates)
         target = svc.get("menu_step") or svc.get("requirement_step")
+        if target == self.current_step_name and not buying:
+            detail = self.requirement_detail(self.message)
+            if detail and svc.get("requirement_step"):
+                self.log("in-menu service detail provided -> routed to requirement")
+                req_val = f"{self.state['requirements']}; {self.message}" if self.state.get("requirements") else self.message
+                clean_req = self.message.strip().strip('"\'')
+                clean_req = re.sub(r'^(?:i\s+(?:also\s+)?(?:want|need|require|would\s+like)\s+(?:to\s+have\s+)?|we\s+(?:also\s+)?(?:want|need|require)\s+)', '', clean_req, flags=re.I).strip()
+                if self.state.get("requirements"):
+                    prefix = f"Great, I've noted that additional requirement: {clean_req}."
+                else:
+                    prefix = f"Great, I've noted your requirement: {clean_req}."
+                return self.go_to(
+                    svc["requirement_step"], intent=key, requirements=req_val,
+                    prefix=prefix, **updates,
+                )
         return self.go_to(target, intent=key, **updates)
 
     @staticmethod
@@ -608,6 +844,20 @@ class _Turn:
 
     def handle_text_step(self) -> dict[str, Any]:
         msg = self.message
+
+        # Guardrail check on text step (prevent jailbreaks, code generation, creative writing from being saved as requirements)
+        guardrail = detect_guardrail_violation(msg)
+        if guardrail:
+            self.log("text step guardrail intercepted: %s", guardrail["type"])
+            self.next_step_name = self.current_step_name
+            return {
+                "reply": guardrail["reply"],
+                "options": self.current_step.get("options") and list(self.current_step["options"]) or guardrail.get("options", ["Main Menu"]),
+                "mode": "guardrail",
+                "conversation_status": self.state.get("status") or "active",
+                "current_step": self.current_step_name,
+            }
+
         # Explicit handoff / pricing requests are not answers to a requirement question.
         if not self.is_action_step():
             handoff = detect_handoff_command(msg)
@@ -623,6 +873,47 @@ class _Turn:
         collects = self.current_step.get("collects") or {
             "BOOK_CALL": "booking_slot", "HUMAN_HANDOFF": "contact_info",
         }.get(self.current_step.get("action"), "requirement")
+
+        valid_email = None
+        valid_phone = None
+        if collects == "contact_info":
+            extracted_email = _EMAIL.search(msg)
+            extracted_phone = _PHONE.search(msg)
+            has_at = "@" in msg
+
+            if extracted_email:
+                em = extracted_email.group(0).strip()
+                if re.match(r"^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$", em):
+                    valid_email = em
+
+            if extracted_phone and sum(c.isdigit() for c in extracted_phone.group(0)) >= 7:
+                valid_phone = extracted_phone.group(0).strip()
+
+            if has_at and not valid_email and not valid_phone:
+                self.next_step_name = self.current_step_name
+                return {
+                    "reply": (
+                        "That email address doesn't look quite right. Please provide a valid email "
+                        "(e.g., name@example.com) or phone number so our team can reach you."
+                    ),
+                    "options": ["Main Menu"],
+                    "mode": "text",
+                    "conversation_status": self.state.get("status") or "active",
+                    "current_step": self.current_step_name,
+                }
+
+            if not valid_email and not valid_phone:
+                self.next_step_name = self.current_step_name
+                return {
+                    "reply": (
+                        "Please share a valid email address or phone number so our team can get in touch with you."
+                    ),
+                    "options": ["Main Menu"],
+                    "mode": "text",
+                    "conversation_status": self.state.get("status") or "active",
+                    "current_step": self.current_step_name,
+                }
+
         field = COLLECT_TO_FIELD[collects]
         updates: dict[str, Any] = {}
         if field == "requirements" and self.state.get("requirements"):
@@ -633,6 +924,18 @@ class _Turn:
             updates["status"] = "completed"
         elif collects == "contact_info":
             updates["status"] = "handoff"
+            if valid_email:
+                updates["email"] = valid_email
+            if valid_phone:
+                updates["phone"] = valid_phone
+            destination_service.save_user(self.tenant_id, {
+                "tenant_id": self.tenant_id,
+                "user_id": self.user_id,
+                "channel": self.channel,
+                **({"email": valid_email} if valid_email else {}),
+                **({"phone": valid_phone} if valid_phone else {}),
+            }, self.destinations)
+
         self.log("text step %s captured %s", self.current_step_name, field)
         return self.go_to(self.current_step["next_step"], **updates)
 
@@ -647,18 +950,28 @@ class _Turn:
         self.next_step_name = self.current_step_name
         self.log("acknowledgement at step %s (status=%s): no state change", self.current_step_name, status)
         if status in CONVERSION_STATUSES:
-            return {"reply": ACK_AFTER_CONVERSION_REPLY, "options": [], "mode": "acknowledgement",
-                    "conversation_status": status}
-        if self.is_text_step():
-            step = build_response(self.current_step, state=self.state)
             return {
-                "reply": f"{ACK_REPROMPT_PREFIX}\n\n{step['reply']}",
+                "reply": self.get_template_text("ack_after_conversion", ACK_AFTER_CONVERSION_REPLY),
+                "options": [],
+                "mode": "acknowledgement",
+                "conversation_status": status,
+            }
+        if self.is_text_step():
+            step = build_response(self.current_step, state=self.state, templates=self.templates)
+            prefix = self.get_template_text("ack_reprompt_prefix", ACK_REPROMPT_PREFIX)
+            return {
+                "reply": f"{prefix}\n\n{step['reply']}",
                 "options": step.get("options", []),
                 "mode": self.mode_for(self.current_step_name, self.current_step),
                 "conversation_status": status,
             }
         options = list(self.current_step.get("options", {})) or self.fallback_options()
-        return {"reply": ACK_REPLY, "options": options, "mode": "acknowledgement", "conversation_status": status}
+        return {
+            "reply": self.get_template_text("acknowledgement", ACK_REPLY),
+            "options": options,
+            "mode": "acknowledgement",
+            "conversation_status": status,
+        }
 
     def handle_chitchat(self, reply: str | None = None, chitchat_type: str = "chitchat", msg: str | None = None) -> dict[str, Any]:
         status = self.state.get("status") or "active"
@@ -666,10 +979,10 @@ class _Turn:
         self.save(self.current_step_name)
         if not reply:
             reply = self.generate_conversational_clarification(msg or self.message) or (
-                "I'm the virtual assistant at OrionSoft Technologies! How can I help you today?"
+                self.get_template_text("chitchat_default", "I'm the virtual assistant at OrionSoft Technologies! How can I help you today?")
             )
         if self.is_text_step():
-            step = build_response(self.current_step, state=self.state)
+            step = build_response(self.current_step, state=self.state, templates=self.templates)
             return {
                 "reply": f"{reply}\n\n{step['reply']}",
                 "options": step.get("options", []),
@@ -688,11 +1001,12 @@ class _Turn:
         status = self.state.get("status") or "active"
         self.next_step_name = self.current_step_name
         self.save(self.current_step_name)
-        reply = (
+        reply = self.get_template_text(
+            "hesitation",
             "No problem at all! Take your time. Feel free to explore our services or ask any questions whenever you're ready."
         )
         if self.is_text_step():
-            step = build_response(self.current_step, state=self.state)
+            step = build_response(self.current_step, state=self.state, templates=self.templates)
             return {
                 "reply": f"{reply}\n\n{step['reply']}",
                 "options": step.get("options", []),
@@ -796,7 +1110,7 @@ Instructions:
         if self.current_step_name and self.state.get("current_step") != self.current_step_name:
             self.save(self.current_step_name)
         ai_reply = self.generate_conversational_clarification(self.message)
-        reply = ai_reply if ai_reply else CLARIFICATION_REPLY
+        reply = ai_reply if ai_reply else self.get_template_text("clarification", CLARIFICATION_REPLY)
         return {
             "reply": reply,
             "options": options,
@@ -813,6 +1127,9 @@ Instructions:
         for field in ("sub_service", "timeline", "platform"):
             if cfg.get(field):
                 updates[field] = cfg[field]
+
+        if cfg.get("use_service_context") == "pricing_step" or label in ("Get an Estimate", "Get an Exact Estimate"):
+            updates["intent"] = "PRICING"
 
         if cfg.get("service"):
             new_state = {**self.state, "service": cfg["service"], "service_key": None, "sub_service": cfg.get("sub_service")}
@@ -832,13 +1149,30 @@ Instructions:
             if target:
                 next_step = target
 
+        target_step = self.steps.get(next_step, {})
+        req_step = self.services().get(self.service_key_for(self.state) or "", {}).get("requirement_step")
+        if target_step.get("collects") == "requirement" or next_step == req_step:
+            if self.requirement_detail(self.message) and normalize(self.message) != normalize(label):
+                self.log("option selection with extra requirement detail -> captured")
+                req_val = f"{self.state['requirements']}; {self.message}" if self.state.get("requirements") else self.message
+                updates["requirements"] = req_val
+                if "prefix" not in updates:
+                    clean_req = self.message.strip().strip('"\'')
+                    clean_req = re.sub(r'^(?:i\s+(?:also\s+)?(?:want|need|require|would\s+like)\s+(?:to\s+have\s+)?|we\s+(?:also\s+)?(?:want|need|require)\s+)', '', clean_req, flags=re.I).strip()
+                    if self.state.get("requirements"):
+                        updates["prefix"] = f"Great, I've noted that additional requirement: {clean_req}."
+                    else:
+                        updates["prefix"] = f"Great, I've noted your requirement: {clean_req}."
+
         if cfg.get("reply"):
             # Static-reply option: show its text, continue from next_step.
-            response = self.go_to(next_step, **updates)
+            prefix = updates.pop("prefix", None)
+            response = self.go_to(next_step, prefix=prefix, **updates)
             options = response.get("options") or self.fallback_options()
             response.update({"reply": cfg["reply"], "options": options})
             return response
-        return self.go_to(next_step, **updates)
+        prefix = updates.pop("prefix", None)
+        return self.go_to(next_step, prefix=prefix, **updates)
 
     # -- transitions / persistence -------------------------------------
     def go_to(
@@ -852,8 +1186,12 @@ Instructions:
         if not target or (target not in self.steps and target != TERMINAL_STEP):
             logger.error("%s transition to missing step '%s' from '%s'", self.tag, target, self.current_step_name)
             self.next_step_name = self.current_step_name
-            return {"reply": SAFE_RECOVERY_REPLY, "options": self.fallback_options(), "mode": "recovery",
-                    "conversation_status": "active"}
+            return {
+                "reply": self.get_template_text("safe_recovery", SAFE_RECOVERY_REPLY),
+                "options": self.fallback_options(),
+                "mode": "recovery",
+                "conversation_status": "active",
+            }
 
         projected = {**self.state, **{k: v for k, v in updates.items() if k != "reset_service_fields"}}
         if updates.get("reset_service_fields"):
@@ -871,18 +1209,28 @@ Instructions:
                 continue
             break
 
+        if target == "talk_to_team" and "exact_estimate" in self.steps:
+            is_pricing_intent = (projected.get("intent") == "PRICING" or self.state.get("intent") == "PRICING")
+            is_from_pricing = self.current_step_name in self._pricing_step_names()
+            if is_pricing_intent or is_from_pricing:
+                target = "exact_estimate"
+
         self.next_step_name = target
         step = self.steps.get(target)
         if step is None:  # TERMINAL_STEP without a step definition
             self.save(target, status="completed", reset_intent=reset_intent, **updates)
-            return {"reply": COMPLETED_REPLY, "options": self.fallback_options(), "mode": "completed",
-                    "conversation_status": "completed"}
+            return {
+                "reply": self.get_template_text("completed", COMPLETED_REPLY),
+                "options": self.fallback_options(),
+                "mode": "completed",
+                "conversation_status": "completed",
+            }
 
         is_terminal = not step.get("options") and not step.get("input_type")
         status = updates.pop("status", None) or ("completed" if is_terminal or target == TERMINAL_STEP else "active")
         self.save(target, status=status, reset_intent=reset_intent, **updates)
 
-        response = build_response(step, state=self.state)
+        response = build_response(step, state=self.state, templates=self.templates)
         if prefix:
             response["reply"] = f"{prefix}\n\n{response['reply']}"
         if not response.get("options") and is_terminal:
@@ -904,60 +1252,97 @@ Instructions:
         if step.get("collects") or step.get("input_type") == "text":
             return "qualification"
         pricing_steps = {s.get("pricing_step") for s in self.services().values()}
-        if name in pricing_steps or name == self.flow.get("routes", {}).get("PRICING"):
+        if name in pricing_steps or name == self.flow.get("routes", {}).get("PRICING") or name == "exact_estimate":
             return "pricing"
         return "menu"
 
     def save(self, step_name: str | None, status: str | None = None, reset_intent: bool = False, **updates: Any) -> None:
-        reset_fields = updates.pop("reset_service_fields", False)
-        fields: dict[str, Any] = {k: v for k, v in updates.items() if k in {
-            "intent", "service", "sub_service", "service_key", "requirements", "timeline",
-            "booking_slot", "contact_info", "platform", "budget",
-        }}
-        if reset_fields:
-            for field in SERVICE_FIELDS:
-                fields.setdefault(field, None)
-        # Lead details mentioned anywhere in free text.
-        fields.update(extract_lead_fields(self.message, self.state))
-        if reset_intent:
-            fields["intent"] = ""
+        t0 = time.perf_counter()
+        self.state = conversation_state_service.save_state(
+            self.tenant_id,
+            self.conversation_id,
+            self.flow.get("flow_id"),
+            step_name,
+            self.state,
+            status=status,
+            reset_intent=reset_intent,
+            message=self.message,
+            destinations=self.destinations,
+            **updates,
+        )
 
-        new_state = {**self.state, **fields}
-        new_state.update({
+        # Sync conversation record with current status and updated_at
+        user_rec = destination_service.get_user(self.tenant_id, self.user_id) or {}
+        conv_rec = destination_service.get_conversation(self.tenant_id, self.conversation_id, self.destinations) or {}
+        user_type = user_rec.get("user_type") or ("RETURNING" if user_rec.get("is_returning") else "NEW")
+        destination_service.save_conversation(self.tenant_id, {
             "tenant_id": self.tenant_id,
             "conversation_id": self.conversation_id,
-            "current_flow": self.flow.get("flow_id"),
+            "user_id": self.user_id,
+            "channel": self.channel,
+            "session_number": user_rec.get("total_conversations") or 1,
+            "user_type": user_type,
+            "status": self.state["status"],
             "current_step": step_name,
-            "status": status or self.state.get("status") or "active",
-            "updated_at": datetime.now(timezone.utc).isoformat(),
-        })
-        t0 = time.perf_counter()
-        repo.save_state({**new_state, "reset_lead_data": True})
-        self.log("state saved in %.3fs: step=%s status=%s", time.perf_counter() - t0, step_name, new_state["status"])
-        self.state = new_state
+            "started_at": conv_rec.get("started_at") or self.state.get("created_at") or self.now,
+            "updated_at": self.now,
+        }, self.destinations)
+
+        # Sync user profile record with any newly discovered details
+        user_name = self.state.get("name") or user_rec.get("name")
+        user_email = self.state.get("email") or user_rec.get("email")
+        user_phone = self.state.get("phone") or user_rec.get("phone")
+        destination_service.save_user(self.tenant_id, {
+            "tenant_id": self.tenant_id,
+            "user_id": self.user_id,
+            "channel": self.channel,
+            "user_type": user_type,
+            "is_returning": True,
+            "total_conversations": user_rec.get("total_conversations") or 1,
+            "active_conversation_id": self.conversation_id,
+            "name": user_name,
+            "email": user_email,
+            "phone": user_phone,
+            "created_at": user_rec.get("created_at") or self.now,
+            "updated_at": self.now,
+        }, self.destinations)
+
+        # Maintain clean, structured final lead record
+        if self.state.get("requirements") or self.state.get("contact_info") or self.state.get("booking_slot") or self.state.get("service") or user_email or user_phone:
+            lead_status = "QUALIFIED" if self.state.get("requirements") else "ENGAGED"
+            if self.state.get("status") == "completed":
+                lead_status = "CALL_BOOKED"
+            elif self.state.get("status") == "handoff":
+                lead_status = "HANDOFF"
+            destination_service.save_lead(self.tenant_id, {
+                "tenant_id": self.tenant_id,
+                "lead_id": f"lead_{self.conversation_id}",
+                "conversation_id": self.conversation_id,
+                "user_id": self.user_id,
+                "channel": self.channel,
+                "user_type": user_type,
+                "name": user_name,
+                "email": user_email,
+                "phone": user_phone,
+                "service_key": self.state.get("service_key") or self.state.get("service"),
+                "requirements": self.state.get("requirements"),
+                "timeline": self.state.get("timeline"),
+                "budget": self.state.get("budget"),
+                "booking_slot": self.state.get("booking_slot"),
+                "contact_info": self.state.get("contact_info"),
+                "existing_url": self.state.get("existing_url"),
+                "platform": self.state.get("platform"),
+                "status": lead_status,
+                "created_at": conv_rec.get("started_at") or self.state.get("created_at") or self.state.get("updated_at") or self.now,
+                "updated_at": self.now,
+            }, self.destinations)
+
+        self.log("state saved in %.3fs: step=%s status=%s", time.perf_counter() - t0, step_name, self.state["status"])
 
 
 def extract_lead_fields(message: str, state: dict[str, Any]) -> dict[str, Any]:
     """Pulls email / phone / URL / budget / name out of free text without overwriting known values."""
-    found: dict[str, Any] = {}
-    if not message:
-        return found
-    email = _EMAIL.search(message)
-    if email and not state.get("email"):
-        found["email"] = email.group(0)
-    phone = _PHONE.search(message)
-    if phone and not state.get("phone") and sum(c.isdigit() for c in phone.group(0)) >= 7:
-        found["phone"] = phone.group(0).strip()
-    url = _URL.search(message.replace(email.group(0), "") if email else message)
-    if url and not state.get("existing_url"):
-        found["existing_url"] = url.group(0)
-    budget = _BUDGET.search(message)
-    if budget and not state.get("budget"):
-        found["budget"] = budget.group(0).strip()
-    name = _NAME.search(message)
-    if name and not state.get("name"):
-        found["name"] = name.group(1).strip()
-    return found
+    return conversation_state_service.extract_lead_fields(message, state)
 
 
 # ----------------------------------------------------------------------
@@ -966,31 +1351,15 @@ def extract_lead_fields(message: str, state: dict[str, Any]) -> dict[str, Any]:
 def build_response(
     step: dict[str, Any],
     mode: str | None = None,
-    state: dict[str, Any] | None = None
+    state: dict[str, Any] | None = None,
+    templates: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Builds the reply/options part of a response for a flow step.
     Interpolates {booking_slot}, {contact_info}, {service}, {sub_service} and hides
     options that would ask for information we already have.
     """
-    current_state = state or {}
-    reply = step.get("reply", "")
-    reply = reply.replace("{booking_slot}", current_state.get("booking_slot") or "your requested time")
-    reply = reply.replace("{contact_info}", current_state.get("contact_info") or "your provided details")
-    reply = reply.replace("{service}", current_state.get("service") or "our services")
-    reply = reply.replace("{sub_service}", current_state.get("sub_service") or "")
-
-    response: dict[str, Any] = {"reply": reply}
-    if mode:
-        response["mode"] = mode
-
-    if isinstance(step.get("options"), dict):
-        opts = list(step["options"].keys())
-        if current_state.get("requirements"):
-            opts = [o for o in opts if o != "Share Project Details First"]
-        response["options"] = opts
-
-    return response
+    return template_service.build_step_response(step, state=state, mode=mode, templates=templates)
 
 
 def resolve_option_label(options: dict[str, Any], message: str) -> str | None:
@@ -1009,15 +1378,15 @@ def save_state(
 ) -> None:
     """Direct state write (kept for scripts/tests). Merges with the existing state."""
     reset = fields.pop("reset_lead_data", False)
-    existing = {} if reset else (repo.get_state(tenant_id, conversation_id) or {})
-    data = {**existing, **{k: v for k, v in fields.items() if v is not None}}
-    data.update({
-        "tenant_id": tenant_id,
-        "conversation_id": conversation_id,
-        "current_flow": flow_id,
-        "current_step": current_step,
-        "intent": intent,
-        "status": status,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-    })
-    repo.save_state({**data, "reset_lead_data": True})
+    existing = {} if reset else (destination_service.get_state(tenant_id, conversation_id) or {})
+    conversation_state_service.save_state(
+        tenant_id,
+        conversation_id,
+        flow_id,
+        current_step,
+        existing,
+        status=status,
+        reset_intent=False,
+        intent=intent,
+        **fields,
+    )

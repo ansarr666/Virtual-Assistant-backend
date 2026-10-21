@@ -96,6 +96,7 @@ app = FastAPI(title="Omnichannel Conversational Lead Bot", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
+    allow_origin_regex=settings.CORS_ORIGIN_REGEX or None,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Accept", "X-Request-ID"],
@@ -149,10 +150,15 @@ def health_details():
         "gemini_configured": bool(settings.GEMINI_API_KEY),
         "flows": {name: ("ok" if not errs else f"{len(errs)} errors") for name, errs in flows.items()},
         "cors_origins": settings.cors_origin_list,
+        "cors_origin_regex": settings.CORS_ORIGIN_REGEX,
         # Booleans only - never values.
         "channels": {
             "webhook_signature_check": bool(settings.META_APP_SECRET),
-            "facebook": bool(settings.FB_PAGE_ID and meta_webhook.facebook_channel.is_configured),
+            "facebook": bool(
+                settings.FB_PAGE_ID
+                and settings.FB_PAGE_ID not in ("your_facebook_page_id", "")
+                and meta_webhook.facebook_channel.is_configured
+            ),
             "instagram": bool(meta_webhook.instagram_channel.is_configured),
             "instagram_signature_secret": bool(settings.IG_APP_SECRET),
             "whatsapp": bool(meta_webhook.whatsapp_channel.is_configured),

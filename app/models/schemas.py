@@ -3,11 +3,13 @@ from pydantic import BaseModel, Field
 
 class ChatRequest(BaseModel):
     tenant_id: str = Field(min_length=1, max_length=64)
-    user_id: str = Field(min_length=1, max_length=128)
+    user_id: str = Field(min_length=1, max_length=256)
     message: str = Field(default="", max_length=4000)
-    channel: str = "web"
+    channel: str = "whatsapp"
     # Same id on retries of one logical message -> processed once (idempotent).
-    client_message_id: str | None = Field(default=None, max_length=128)
+    # Instagram mids are base64 strings that can exceed 160 characters.
+    client_message_id: str | None = Field(default=None, max_length=512)
+    is_new_session: bool = False
 
 
 class OptionMatchResult(BaseModel):
@@ -34,3 +36,15 @@ class ChatResponse(BaseModel):
     conversation_status: str = "active"
     current_step: str | None = None
     client_message_id: str | None = None
+
+
+# Re-export modular flow schemas for convenience
+from flows.schemas import (  # noqa: E402
+    ClientConfig,
+    DestinationsConfig,
+    FlowDefinition,
+    FlowPackage,
+    StepDefinition,
+    StepOption,
+    TemplateItem,
+)

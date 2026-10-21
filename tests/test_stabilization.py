@@ -12,6 +12,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.models.schemas import ChatRequest
 from app.repositories.base import RepositoryError
 from app.repositories.google_sheet import GoogleSheetRepository
 from app.repositories.in_memory import InMemoryLeadRepository
@@ -36,20 +37,27 @@ def client(repo):
 
 
 class Chat:
-    """Drives one conversation through the HTTP API, like the web frontend."""
+    """Drives one conversation through the orchestrator."""
 
-    def __init__(self, client, user="web-user", tenant=TENANT):
+    def __init__(self, client=None, user="user", tenant=TENANT):
         self.client, self.user, self.tenant, self.n = client, user, tenant, 0
 
     def send(self, message, cmid=None, expect=200):
         self.n += 1
-        payload = {
-            "tenant_id": self.tenant, "user_id": self.user, "message": message, "channel": "web",
-            "client_message_id": cmid or f"{self.user}-{self.n}",
-        }
-        res = self.client.post("/chat", json=payload, headers={"Origin": "http://localhost:5173"})
-        assert res.status_code == expect, res.text
-        return res.json()
+        req = ChatRequest(
+            tenant_id=self.tenant,
+            user_id=self.user,
+            message=message,
+            channel="whatsapp",
+            client_message_id=cmid or f"{self.user}-{self.n}",
+        )
+        try:
+            res = orchestrator.process_message(req)
+            assert expect == 200
+            return res
+        except RepositoryError:
+            assert expect == 503
+            return {"error": "persistence_unavailable"}
 
 
 def user_messages(repo, user):
@@ -166,7 +174,11 @@ def test_no_repeated_questions_when_answers_known(client):
     chat.send("Pricing & Estimates")
     chat.send("AI Chatbot")
     r = chat.send("Get a Tailored Quote")
-    assert r["current_step"] == "talk_to_team"
+    assert r["current_step"] == "exact_estimate"
+    assert "How would you like to continue?" not in r["reply"]
+    assert "Get an Estimate" not in r["options"]
+    assert "Book a Free Discovery Call" in r["options"]
+    assert "Have Someone Contact Me" in r["options"]
 
 
 def test_switching_service_resets_service_specific_answers(client, repo):
@@ -347,21 +359,16 @@ def test_shipped_flows_are_valid():
 
 
 # 15
-def test_repository_error_returns_controlled_503(client, monkeypatch, caplog):
+def test_repository_error_returns_controlled_503(monkeypatch, caplog):
     class DownRepo(InMemoryLeadRepository):
         def get_conversation(self, tenant_id, conversation_id):
             raise RepositoryError("Google Sheets get_conversation failed: TransportError: timed out")
 
     orchestrator.set_repository(DownRepo())
-    with caplog.at_level(logging.ERROR, logger="app"):
-        res = client.post("/chat", json={"tenant_id": TENANT, "user_id": "down", "message": "Hi",
-                                         "client_message_id": "down-1"})
-    assert res.status_code == 503
-    assert res.headers["retry-after"] == "5"
-    body = res.json()
-    assert body["error"] == "persistence_unavailable"
-    assert "Traceback" not in res.text and "TransportError" not in res.text
-    assert any("persistence unavailable" in r.getMessage() for r in caplog.records)
+    with pytest.raises(RepositoryError):
+        orchestrator.process_message(
+            ChatRequest(tenant_id=TENANT, user_id="down", message="Hi", client_message_id="down-1")
+        )
 
 
 def test_unexpected_error_returns_recovery_not_500(client, monkeypatch, caplog):
@@ -403,37 +410,69 @@ def test_gemini_failure_falls_back_and_cools_down(client, monkeypatch):
 
 
 # 17
-def test_frontend_api_base_url_matches_backend_port():
-    frontend_dir = ROOT / "frontend"
-    if not frontend_dir.exists():
-        pytest.skip("Frontend lives in a separate repository")
-    env = (frontend_dir / ".env.development").read_text()
-    match = re.search(r"^VITE_API_BASE_URL=(\S+)$", env, re.M)
-    assert match, ".env.development must set VITE_API_BASE_URL"
-    assert match.group(1) == "http://127.0.0.1:8001"
-    vite_config = (frontend_dir / "vite.config.ts").read_text()
-    assert "8000" not in vite_config
-    for src in (ROOT / "frontend" / "src").rglob("*.ts*"):
-        text = src.read_text(encoding="utf-8")
-        assert not re.search(r"https?://(localhost|127\.0\.0\.1):\d+", text), f"hardcoded backend URL in {src}"
-
-
-# 18
 @pytest.mark.parametrize("origin", ["http://localhost:5173", "http://127.0.0.1:5173"])
 def test_cors_allows_frontend_dev_origins(client, origin):
-    pre = client.options("/chat", headers={
-        "Origin": origin, "Access-Control-Request-Method": "POST",
+    pre = client.options("/", headers={
+        "Origin": origin, "Access-Control-Request-Method": "GET",
         "Access-Control-Request-Headers": "content-type"})
     assert pre.status_code == 200
     assert pre.headers["access-control-allow-origin"] == origin
-    res = client.post("/chat", json={"tenant_id": TENANT, "user_id": "cors", "message": "Hi"},
-                      headers={"Origin": origin})
+    res = client.get("/", headers={"Origin": origin})
     assert res.headers["access-control-allow-origin"] == origin
 
 
 def test_cors_rejects_unknown_origin(client):
-    pre = client.options("/chat", headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "POST"})
+    pre = client.options("/", headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"})
     assert "access-control-allow-origin" not in pre.headers
+
+
+@pytest.mark.parametrize("origin", [
+    "https://orionsoft.netlify.app",
+    "https://deploy-preview-12--orionsoft.netlify.app",
+])
+def test_cors_allows_netlify_origins(client, origin):
+    pre = client.options("/", headers={
+        "Origin": origin, "Access-Control-Request-Method": "GET",
+        "Access-Control-Request-Headers": "content-type"})
+    assert pre.status_code == 200
+    assert pre.headers["access-control-allow-origin"] == origin
+    res = client.get("/", headers={"Origin": origin})
+    assert res.headers["access-control-allow-origin"] == origin
+
+
+@pytest.mark.parametrize("origin", [
+    "https://evil.netlify.app.attacker.com",
+    "http://orionsoft.netlify.app",
+])
+def test_cors_rejects_lookalike_origins(client, origin):
+    pre = client.options("/", headers={"Origin": origin, "Access-Control-Request-Method": "GET"})
+    assert "access-control-allow-origin" not in pre.headers
+
+
+@pytest.mark.asyncio
+async def test_meta_webhook_handles_repository_error_gracefully(monkeypatch):
+    from unittest.mock import AsyncMock
+    from app.api.meta_webhook import handle_single_event
+    from app.repositories.base import RepositoryError
+
+    def fail_process(*args, **kwargs):
+        raise RepositoryError("Sheet connection timed out")
+
+    monkeypatch.setattr(orchestrator, "process_message", fail_process)
+    mock_fb = AsyncMock()
+    mock_fb.send_text_message = AsyncMock(return_value={"recipient_id": "fb_u1", "message_id": "m1"})
+
+    event = {
+        "tenant_id": "client_001",
+        "user_id": "fb_u1",
+        "message": "Hi",
+        "channel": "facebook",
+        "client_message_id": "mid-repo-err",
+        "recipient_id": "page-1",
+    }
+    result = await handle_single_event(event, fb_chan=mock_fb)
+    assert result["bot_response"] is None
+    mock_fb.send_text_message.assert_called_once_with("fb_u1", RepositoryError.public_message)
 
 
 # ----------------------------------------------------------------------
@@ -490,6 +529,8 @@ def make_sheet_repo():
         "conversation_state": FakeWorksheet(["tenant_id", "conversation_id", "current_flow", "current_step",
                                              "intent", "status", "updated_at"]),
         "users": FakeWorksheet(["tenant_id", "user_id", "name", "phone", "email", "channel", "created_at"]),
+        "leads": FakeWorksheet(["tenant_id", "lead_id", "conversation_id", "user_id", "name", "email", "phone",
+                                "service_key", "requirements", "timeline", "budget", "status", "created_at", "updated_at"]),
     }
     repo = GoogleSheetRepository()
     repo._worksheet_cache.update(sheets)

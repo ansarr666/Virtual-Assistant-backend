@@ -5,6 +5,7 @@ Deterministic rules run first and handle the common cases with no network call.
 Gemini is only consulted for ambiguous free text, and every Gemini failure
 degrades to "no match" so the orchestrator can fall back gracefully.
 """
+import difflib
 import logging
 import re
 from typing import Any
@@ -25,10 +26,66 @@ SERVICE_INTENTS = (
 )
 
 
+# High-frequency domain and intent keywords for fuzzy typo tolerance
+_KNOWN_DOMAIN_KEYWORDS: tuple[str, ...] = (
+    "inventory", "management", "software", "website", "development",
+    "developer", "application", "applications", "mobile", "android",
+    "iphone", "flutter", "react", "chatbot", "chatbots", "ecommerce",
+    "shopify", "automation", "automate", "marketing", "pricing",
+    "timeline", "estimate", "portfolio", "company", "services",
+    "system", "systems", "portal", "dashboard", "integration",
+    "integrations", "discovery", "consultation", "requirement",
+    "requirements", "business", "schedule", "meeting", "contact",
+    "restart", "budget", "cost", "quote", "immediately", "exploring",
+)
+
+
+# ----------------------------------------------------------------------
+# Acknowledgements ("ok", "thanks", "sounds good", "👍")
+# ----------------------------------------------------------------------
+_ACK_CORE = {
+    "ok", "okay", "okk", "okey", "k", "kk", "thanks", "thank", "thankyou", "thanx", "thnx", "thx", "ty",
+    "tysm", "cool", "great", "perfect", "alright", "allright", "done", "sure", "fine", "nice", "awesome",
+    "noted", "understood", "gotcha", "got", "good", "appreciate", "appreciated", "cheers", "excellent",
+    "wonderful", "amazing", "super", "lovely", "right", "clear", "helpful", "makes", "sense", "useful",
+    "neat", "splendid", "fantastic", "brilliant", "sweet", "valid", "kudos", "welcome",
+}
+_ACK_FILLER = {
+    "it", "sounds", "looks", "seems", "all", "so", "much", "a", "lot", "very", "well",
+    "yeah", "yes", "yep", "yup", "i", "see", "have", "is", "was", "that", "thats",
+    "for", "now", "then", "really", "totally", "absolutely", "definitely", "indeed",
+}
+_PROTECTED_WORDS = _ACK_CORE | _ACK_FILLER | {
+    "what", "when", "where", "which", "who", "whom", "whose", "why", "how",
+    "can", "could", "would", "should", "will", "shall", "may", "might", "must",
+    "need", "want", "have", "with", "from", "that", "this", "they", "them",
+    "your", "yours", "about", "there", "their", "here", "help", "build", "make",
+    "work", "look", "more", "some", "like", "into", "time", "date", "call",
+    "team", "free", "view", "menu", "back", "home", "start", "read", "real",
+    "lead", "deal", "tell", "show", "cost", "give", "take", "just", "only",
+}
+
+
+def _correct_domain_typos(text: str) -> str:
+    """Corrects close typographical errors for key domain terms without altering common words."""
+    if not text:
+        return text
+    tokens = text.split()
+    corrected: list[str] = []
+    for token in tokens:
+        if len(token) >= 5 and token not in _PROTECTED_WORDS and token not in _KNOWN_DOMAIN_KEYWORDS:
+            matches = difflib.get_close_matches(token, _KNOWN_DOMAIN_KEYWORDS, n=1, cutoff=0.76)
+            if matches:
+                corrected.append(matches[0])
+                continue
+        corrected.append(token)
+    return " ".join(corrected)
+
 def normalize(message: str) -> str:
-    """Lowercase, drop punctuation, collapse whitespace."""
+    """Lowercase, drop punctuation, collapse whitespace, and normalize domain typos."""
     text = (message or "").lower().replace("'", "")
-    return re.sub(r"[^\w]+", " ", text).strip()
+    clean = re.sub(r"[^\w]+", " ", text).strip()
+    return _correct_domain_typos(clean)
 
 
 def _has(pattern: str, text: str) -> bool:
@@ -166,6 +223,106 @@ def detect_chitchat(message: str) -> dict[str, str] | None:
             "type": "farewell",
             "reply": "Goodbye! Have a wonderful day ahead, and feel free to reach back out anytime you need software, web, or AI development assistance!",
         }
+# ----------------------------------------------------------------------
+# Guardrails & Role Adherence (Coding help, creative writing, jailbreaks, out-of-domain)
+# ----------------------------------------------------------------------
+_GUARDRAIL_CODING_PATTERNS = (
+    r"\b(?:write|code|generate|implement|debug|fix|solve)\s+(?:a\s+|an\s+)?(?:python|javascript|typescript|js|ts|c\+\+|java|c#|golang|rust|html|css|sql|bash|powershell|regex|script|code|algorithm|function|class|program|method|binary\s+tree|quicksort|mergesort)\b",
+    r"\b(?:how\s+to\s+(?:code|write|program|implement|solve))\s+[a-z0-9_\s]+\s+(?:in\s+(?:python|javascript|java|c\+\+|sql|go|rust|php))\b",
+    r"\b(?:give\s+me\s+(?:the\s+)?code\s+for)\b",
+    r"\b(?:write\s+(?:me\s+)?a\s+script\s+to)\b",
+    r"\b(?:can\s+you\s+(?:write|give\s+me)\s+(?:some\s+)?code)\b",
+)
+
+_GUARDRAIL_CREATIVE_PATTERNS = (
+    r"\b(?:write|compose|tell)\s+(?:me\s+)?(?:a\s+)?(?:poem|poetry|rhyme|haiku|short\s+story|story|novel|joke|essay|song|lyrics|rap|riddle|fantasy|fairytale)\b",
+    r"\b(?:tell\s+me\s+a\s+joke)\b",
+)
+
+_GUARDRAIL_JAILBREAK_PATTERNS = (
+    r"\b(?:ignore|forget|disregard|override|bypass)\s+(?:all\s+)?(?:previous|prior|system)\s+(?:instructions|prompts|rules|guidelines)\b",
+    r"\b(?:act|pretend|behave)\s+as\s+(?:a\s+|an\s+)?(?:unrestricted|dan|developer|evil|linux|terminal|chatgpt|jailbroken|god)\b",
+    r"\b(?:you\s+are\s+now\s+(?:a\s+|an\s+)?(?:unrestricted|dan|developer|linux|terminal))\b",
+    r"\b(?:what\s+(?:is|are)\s+your\s+(?:system\s+prompt|hidden\s+instructions|system\s+instructions|rules))\b",
+    r"\b(?:repeat\s+(?:the\s+words\s+above|the\s+prompt\s+above|everything\s+above))\b",
+)
+
+_GUARDRAIL_OUT_OF_DOMAIN_PATTERNS = (
+    r"\b(?:who\s+is\s+(?:the\s+)?(?:president|prime\s+minister|king|queen|governor|mayor))\b",
+    r"\b(?:capital\s+of\s+[a-z]+|weather\s+in\s+[a-z]+|forecast\s+for)\b",
+    r"\b(?:recipe\s+for|how\s+to\s+(?:cook|bake|make)\s+(?:cake|pizza|pasta|bread|cookie|cookies|soup))\b",
+    r"\b(?:cricket\s+score|football\s+score|nba\s+score|who\s+won\s+the\s+(?:match|game|world\s+cup|election))\b",
+    r"\b(?:horoscope|astrology|zodiac\s+sign|lottery\s+numbers|stock\s+tips)\b",
+)
+
+
+def detect_guardrail_violation(message: str) -> dict[str, Any] | None:
+    """
+    Detects attempts to use the bot outside its intended sales/qualification role.
+    Distinguishes legitimate project inquiries ('build a python backend') from
+    unsupported requests ('write python code for quicksort').
+    """
+    raw = (message or "").strip()
+    if not raw:
+        return None
+    text = normalize(raw)
+
+    # 1. Jailbreak / Role override
+    for pat in _GUARDRAIL_JAILBREAK_PATTERNS:
+        if re.search(pat, text):
+            return {
+                "type": "jailbreak",
+                "reply": (
+                    "I am the virtual sales assistant for OrionSoft Technologies and operate strictly within "
+                    "my guidelines to assist with our software, web, mobile, and AI development services. "
+                    "How can I help you with your project today?"
+                ),
+                "options": ["Explore Services", "Talk to Team", "Main Menu"],
+            }
+
+    # Don't trigger coding/creative guards if the user is expressing genuine buying interest in a project
+    buying = any(_has(b, text) for b in ("build", "develop", "hire", "need a project", "quote", "agency", "cost to"))
+
+    # 2. Coding help / homework request
+    if not buying:
+        for pat in _GUARDRAIL_CODING_PATTERNS:
+            if re.search(pat, text):
+                return {
+                    "type": "coding_help",
+                    "reply": (
+                        "I'm here to assist with OrionSoft Technologies' custom software, web, mobile, and AI development services! "
+                        "While I cannot write or debug code directly in chat, our engineering team can build and deliver complete "
+                        "software solutions for your business. Would you like to discuss your project requirements or book a free discovery call?"
+                    ),
+                    "options": ["Talk to Team", "Explore Services", "Main Menu"],
+                }
+
+    # 3. Creative writing
+    for pat in _GUARDRAIL_CREATIVE_PATTERNS:
+        if re.search(pat, text):
+            return {
+                "type": "creative_writing",
+                "reply": (
+                    "I am OrionSoft Technologies' sales assistant, specialized in our digital solutions and software engineering. "
+                    "I don't generate creative writing, but I'd love to help you build your website, mobile app, or AI solution. "
+                    "What type of project are you planning?"
+                ),
+                "options": ["Explore Services", "Talk to Team", "Main Menu"],
+            }
+
+    # 4. Out of domain general trivia / non-business topics
+    for pat in _GUARDRAIL_OUT_OF_DOMAIN_PATTERNS:
+        if re.search(pat, text):
+            return {
+                "type": "out_of_domain",
+                "reply": (
+                    "I specialize in OrionSoft Technologies' software development, AI solutions, and digital growth services. "
+                    "I'm unable to answer general trivia or outside topics, but I can help you with your technology and software needs. "
+                    "How can we assist you today?"
+                ),
+                "options": ["Explore Services", "Talk to Team", "Main Menu"],
+            }
+
     return None
 
 
@@ -284,7 +441,7 @@ _SERVICE_PATTERNS: tuple[tuple[str, str], ...] = (
     ("WEBSITE", r"web\s*sites?|landing\s+pages?|web\s*pages?|web\s+app(?:lication)?s?|wordpress|webflow"),
     ("MOBILE_APP", r"mobile\s+apps?|apps?|android|ios|iphone|flutter|react\s+native|play\s+store|app\s+store"),
     ("SEO", r"seo|digital\s+marketing|marketing|google\s+ads|paid\s+ads|ppc|social\s+media|meta\s+ads|ads\s+campaign"),
-    ("CUSTOM_SOFTWARE", r"custom\s+software|software|saas|erp|crm|internal\s+tools?|portal|dashboard|integrations?|api"),
+    ("CUSTOM_SOFTWARE", r"custom\s+software|software|saas|erp|crm|inventory|warehouse|billing|pos|internal\s+tools?|portal|dashboard|integrations?|api|management\s+systems?"),
     ("AI_AUTOMATION", r"ai|artificial\s+intelligence|automation|automate|machine\s+learning|ml|llm|gen\s*ai|generative\s+ai"),
 )
 _PRICING = r"how\s+much|costs?|costing|price|prices|pricing|priced|estimate|estimates|quote|quotes|quotation|rates?|fees?|charges?|budget|expensive|cheap|affordable"
@@ -386,6 +543,7 @@ def classify_global_intent(message: str) -> IntentClassificationResult:
 
     prompt = f"""
 Analyze the user message in the context of a software, web, mobile, AI and digital growth agency's sales assistant.
+NOTE: The user message may contain typos, misspellings, or phonetic spelling (e.g. 'invenrtory', 'amnagement', 'websiet', 'chatbto'). Identify their true intent regardless of spelling mistakes.
 
 Message: "{message}"
 
@@ -466,9 +624,25 @@ def match_option_fuzzy(options: dict[str, Any] | list[str], message: str) -> str
         if not label_norm:
             continue
         phrases = [label_norm]
+
+        # Extract constituent sub-parts from compound labels like "RAG / Knowledge Base Chatbot" or "E-commerce / Shopify"
+        raw_parts = [p.strip() for p in re.split(r'[/()&]', label) if p.strip()]
+        if len(raw_parts) > 1:
+            for p in raw_parts:
+                pn = normalize(p)
+                if pn and len(pn) >= 3:
+                    phrases.append(pn)
+            words = label.split()
+            last_word = words[-1].lower()
+            if last_word in ("chatbot", "bot", "app", "store", "website", "software", "marketing", "development"):
+                for p in raw_parts[:-1]:
+                    comb = normalize(f"{p} {last_word}")
+                    if comb:
+                        phrases.append(comb)
+
         if isinstance(options, dict) and isinstance(options[label], dict):
             phrases += [normalize(a) for a in options[label].get("aliases", [])]
-        for phrase in phrases:
+        for phrase in set(phrases):
             if not phrase:
                 continue
             # The option (or an alias) appears inside the message ...
@@ -477,6 +651,13 @@ def match_option_fuzzy(options: dict[str, Any] | list[str], message: str) -> str
             # ... or a short message is part of an option label ("1 month" -> "Within 1 Month").
             elif len(norm) >= 4 and len(norm.split()) <= 4 and _has(re.escape(norm), phrase):
                 candidates[label] = max(candidates.get(label, 0), len(norm))
+    # Check close string similarity against each option label for misspelled option phrases
+    for label in options:
+        label_norm = normalize(label)
+        if label_norm and difflib.SequenceMatcher(None, norm, label_norm).ratio() >= 0.80:
+            return label
+
+
 
     if not candidates:
         return None

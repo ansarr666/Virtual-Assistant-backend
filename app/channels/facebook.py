@@ -48,9 +48,24 @@ class FacebookMessengerChannel(MetaMessagingChannel):
         return {"messaging_type": "RESPONSE"}
 
     def on_error(self, err: dict[str, Any]) -> None:
-        if err.get("code") == 100 and err.get("error_subcode") == 33:
+        code = err.get("code")
+        subcode = err.get("error_subcode")
+        if code == 100 and subcode == 33:
             logger.error(
                 "Hint: Graph could not resolve '/me' as a Page. FB_PAGE_ACCESS_TOKEN is most likely "
                 "a User token, not the Page access token for FB_PAGE_ID=%s.",
                 self.page_id,
             )
+        elif code == 190:
+            logger.error(
+                "Hint: Graph returned error 190 (Invalid/Expired OAuth access token). "
+                "Verify FB_PAGE_ACCESS_TOKEN is a valid, unexpired Page Access Token for Page ID=%s.",
+                self.page_id,
+            )
+        elif code == 200:
+            logger.error(
+                "Hint: Graph returned error 200 (Permissions error). In Development Mode, the recipient "
+                "must have an Admin, Developer, or Tester role on the Meta App, and the Page token "
+                "must have 'pages_messaging' permission."
+            )
+

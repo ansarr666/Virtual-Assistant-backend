@@ -15,6 +15,8 @@ from google.genai import types
 
 from app.config import get_settings
 
+import httpx
+
 logger = logging.getLogger(__name__)
 
 _cooldown_until = 0.0
@@ -71,13 +73,59 @@ def _is_quota_or_outage(error: Exception) -> bool:
     return any(s in text for s in ("RESOURCE_EXHAUSTED", "UNAVAILABLE", "timed out", "Timeout", "ConnectError"))
 
 
+def generate_openrouter(prompt: str, operation: str, config: types.GenerateContentConfig | None = None) -> str | None:
+    """Fallback generator using OpenRouter when Gemini is unavailable or in cooldown."""
+    settings = get_settings()
+    api_key = (settings.OPENROUTER_API_KEY or "").strip()
+    if not api_key:
+        return None
+
+    t0 = time.perf_counter()
+    logger.info("[AI-OpenRouter] %s fallback start", operation)
+    url = f"{settings.OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://orionsoft.tech",
+        "X-Title": "OrionSoft Omnichannel Lead Bot",
+    }
+    payload: dict[str, Any] = {
+        "model": settings.OPENROUTER_MODEL.strip(),
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": getattr(config, "temperature", 0.1) if config else 0.1,
+    }
+    if config and getattr(config, "response_mime_type", "") == "application/json":
+        payload["response_format"] = {"type": "json_object"}
+
+    try:
+        timeout = float(settings.OPENROUTER_TIMEOUT_SECONDS)
+        with httpx.Client(timeout=timeout) as http_client:
+            resp = http_client.post(url, headers=headers, json=payload)
+        if resp.status_code == 200:
+            data = resp.json()
+            choices = data.get("choices") or []
+            if choices and choices[0].get("message"):
+                text = (choices[0]["message"].get("content") or "").strip()
+                logger.info("[AI-OpenRouter] %s succeeded in %.2fs", operation, time.perf_counter() - t0)
+                return text
+        logger.warning(
+            "[AI-OpenRouter] %s returned HTTP %s in %.2fs: %s",
+            operation, resp.status_code, time.perf_counter() - t0, resp.text[:200],
+        )
+    except Exception as e:
+        logger.warning(
+            "[AI-OpenRouter] %s failed after %.2fs: %s: %s",
+            operation, time.perf_counter() - t0, type(e).__name__, str(e)[:200],
+        )
+    return None
+
+
 def generate(client: Any, prompt: str, operation: str, config: types.GenerateContentConfig) -> str | None:
-    """Runs one Gemini call. Returns response text, or None on any failure (never raises)."""
-    if client is None:
-        return None
-    if in_cooldown():
-        logger.info("[AI] %s skipped (cooldown active)", operation)
-        return None
+    """Runs one Gemini call with automatic OpenRouter fallback on failure/cooldown."""
+    if client is None or in_cooldown():
+        if in_cooldown():
+            logger.info("[AI] %s skipped (Gemini cooldown active) -> trying OpenRouter fallback", operation)
+        return generate_openrouter(prompt, operation, config)
 
     t0 = time.perf_counter()
     logger.info("[AI] %s start", operation)
@@ -88,9 +136,10 @@ def generate(client: Any, prompt: str, operation: str, config: types.GenerateCon
         return text
     except Exception as e:
         logger.warning(
-            "[AI] %s failed after %.2fs: %s: %s",
+            "[AI] %s failed after %.2fs: %s: %s -> falling back to OpenRouter",
             operation, time.perf_counter() - t0, type(e).__name__, str(e)[:300],
         )
         if _is_quota_or_outage(e):
             _start_cooldown(f"{type(e).__name__}: {str(e)[:120]}")
-        return None
+        return generate_openrouter(prompt, operation, config)
+

@@ -23,6 +23,7 @@
     "Talk to Team": "talk_to_team",
     "Book a Free Discovery Call": "booking",
     "Have Someone Contact Me": "human_handoff",
+    "Get an Exact Estimate": "exact_estimate",
     "Ask a Question": "rag_mode",
     "Ask Another Question": "rag_mode"
   },
@@ -295,9 +296,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -448,9 +449,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -594,9 +595,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -742,9 +743,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -813,23 +814,54 @@
       "options": {
         "Website Chatbot": {
           "next_step": "chatbot_requirement",
-          "sub_service": "Website Chatbot"
+          "sub_service": "Website Chatbot",
+          "aliases": [
+            "Website Bot",
+            "Web Bot",
+            "Web Chatbot",
+            "Site Bot"
+          ]
         },
         "WhatsApp Chatbot": {
           "next_step": "chatbot_requirement",
-          "sub_service": "WhatsApp Chatbot"
+          "sub_service": "WhatsApp Chatbot",
+          "aliases": [
+            "WhatsApp Bot",
+            "WA Bot",
+            "WhatsApp Automation"
+          ]
         },
         "Lead Generation Bot": {
           "next_step": "chatbot_requirement",
-          "sub_service": "Lead Generation Bot"
+          "sub_service": "Lead Generation Bot",
+          "aliases": [
+            "Lead Generation",
+            "Lead Bot",
+            "Lead Gen Bot",
+            "Lead Generation Chatbot"
+          ]
         },
         "Customer Support Bot": {
           "next_step": "chatbot_requirement",
-          "sub_service": "Customer Support Bot"
+          "sub_service": "Customer Support Bot",
+          "aliases": [
+            "Customer Support",
+            "Support Bot",
+            "Customer Service Bot",
+            "Customer Support Chatbot"
+          ]
         },
         "RAG / Knowledge Base Chatbot": {
           "next_step": "chatbot_requirement",
-          "sub_service": "RAG Chatbot"
+          "sub_service": "RAG Chatbot",
+          "aliases": [
+            "RAG",
+            "RAG Bot",
+            "RAG Chatbot",
+            "Knowledge Base Bot",
+            "Knowledge Base Chatbot",
+            "Knowledge Base"
+          ]
         },
         "Other": {
           "next_step": "chatbot_other",
@@ -888,9 +920,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -1035,9 +1067,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -1188,9 +1220,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -1348,9 +1380,9 @@
             "3 weeks"
           ]
         },
-        "1\u20133 Months": {
+        "1–3 Months": {
           "next_step": "talk_to_team",
-          "timeline": "1\u20133 Months",
+          "timeline": "1–3 Months",
           "aliases": [
             "1-3 months",
             "2 months",
@@ -1385,6 +1417,7 @@
         "Get an Estimate": {
           "next_step": "pricing",
           "use_service_context": "pricing_step",
+          "intent": "PRICING",
           "aliases": [
             "estimate",
             "an estimate",
@@ -1580,6 +1613,32 @@
       "options": {
         "Talk to Our Team": {
           "next_step": "talk_to_team"
+        },
+        "Main Menu": {
+          "next_step": "welcome"
+        }
+      }
+    },
+    "exact_estimate": {
+      "reply": "To provide an exact estimate tailored to your project, our team reviews your scope and requirements during a quick discovery call, or we can have a specialist contact you directly.",
+      "options": {
+        "Book a Free Discovery Call": {
+          "next_step": "booking",
+          "aliases": [
+            "book a call",
+            "schedule a call",
+            "discovery call",
+            "book"
+          ]
+        },
+        "Have Someone Contact Me": {
+          "next_step": "human_handoff",
+          "aliases": [
+            "contact me",
+            "call me",
+            "reach out",
+            "email me"
+          ]
         },
         "Main Menu": {
           "next_step": "welcome"

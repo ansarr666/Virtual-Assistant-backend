@@ -1,0 +1,1038 @@
+{
+  "safe_recovery": {
+    "text": "I couldn't determine the next step. You can choose an option below, ask another question, or return to the main menu."
+  },
+  "clarification": {
+    "text": "I'm not sure I understood that. You can choose one of the options below, ask about our services, or return to the main menu."
+  },
+  "completed": {
+    "text": "Thank you! Our team will take it from here.",
+    "options": [
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "acknowledgement": {
+    "text": "You're welcome! Let me know if there's anything else I can help with."
+  },
+  "ack_after_conversion": {
+    "text": "You're welcome! We'll be in touch soon."
+  },
+  "ack_reprompt_prefix": {
+    "text": "Sure! Just one more thing before we continue:"
+  },
+  "chitchat_default": {
+    "text": "I'm the virtual assistant at OrionSoft Technologies! How can I help you today?"
+  },
+  "hesitation": {
+    "text": "No problem at all! Take your time. Feel free to explore our services or ask any questions whenever you're ready."
+  },
+  "welcome": {
+    "text": "Welcome to OrionSoft Technologies! How can we help you today?",
+    "options": [
+      {
+        "label": "Our Services",
+        "id": "services"
+      },
+      {
+        "label": "Pricing & Estimates",
+        "id": "pricing"
+      },
+      {
+        "label": "Portfolio / Experience",
+        "id": "portfolio"
+      },
+      {
+        "label": "Talk to Our Team",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Ask a Question",
+        "id": "rag_mode"
+      }
+    ]
+  },
+  "services": {
+    "text": "Which service are you interested in?",
+    "options": [
+      {
+        "label": "Website Development",
+        "id": "website_development"
+      },
+      {
+        "label": "Mobile App Development",
+        "id": "mobile_app"
+      },
+      {
+        "label": "Custom Software",
+        "id": "custom_software"
+      },
+      {
+        "label": "AI & Automation",
+        "id": "ai_automation"
+      },
+      {
+        "label": "E-commerce / Shopify",
+        "id": "ecommerce"
+      },
+      {
+        "label": "SEO & Digital Marketing",
+        "id": "seo_marketing"
+      },
+      {
+        "label": "AI Chatbot Development",
+        "id": "chatbot"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "website_development": {
+    "text": "What would you like help with regarding your website?",
+    "options": [
+      {
+        "label": "New Website",
+        "id": "website_requirement"
+      },
+      {
+        "label": "Redesign My Website",
+        "id": "website_requirement"
+      },
+      {
+        "label": "E-commerce Website",
+        "id": "website_requirement"
+      },
+      {
+        "label": "Website Features / Technology",
+        "id": "website_requirement"
+      },
+      {
+        "label": "Other",
+        "id": "website_other"
+      },
+      {
+        "label": "Back to Services",
+        "id": "services"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "website_requirement": {
+    "text": "What type of website are you looking to build? Tell us briefly about your project goals.",
+    "options": []
+  },
+  "website_other": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "website_timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "website_pricing": {
+    "text": "Website development pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+    "options": [
+      {
+        "label": "Get an Exact Estimate",
+        "id": "website_requirement"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share More Project Details",
+        "id": "website_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "mobile_app": {
+    "text": "What kind of mobile application are you planning?",
+    "options": [
+      {
+        "label": "I Have an App Idea",
+        "id": "mobile_app_idea"
+      },
+      {
+        "label": "Android App",
+        "id": "mobile_requirement"
+      },
+      {
+        "label": "iOS App",
+        "id": "mobile_requirement"
+      },
+      {
+        "label": "Cross-Platform App",
+        "id": "mobile_requirement"
+      },
+      {
+        "label": "Existing App / Improvements",
+        "id": "mobile_requirement"
+      },
+      {
+        "label": "Other",
+        "id": "mobile_other"
+      },
+      {
+        "label": "Back to Services",
+        "id": "services"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "mobile_app_idea": {
+    "text": "Tell us briefly about your app idea.",
+    "options": []
+  },
+  "mobile_requirement": {
+    "text": "Tell us briefly about the app you'd like to build.",
+    "options": []
+  },
+  "mobile_other": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "mobile_timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "mobile_pricing": {
+    "text": "Mobile app development pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+    "options": [
+      {
+        "label": "Get a Custom Quote",
+        "id": "mobile_requirement"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share More Project Details",
+        "id": "mobile_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "custom_software": {
+    "text": "What type of custom software are you looking to develop?",
+    "options": [
+      {
+        "label": "Business Software",
+        "id": "custom_software_requirement"
+      },
+      {
+        "label": "Process Automation",
+        "id": "custom_software_requirement"
+      },
+      {
+        "label": "Custom Features / Platform",
+        "id": "custom_software_requirement"
+      },
+      {
+        "label": "System Integrations",
+        "id": "custom_software_requirement"
+      },
+      {
+        "label": "Internal Tools",
+        "id": "custom_software_requirement"
+      },
+      {
+        "label": "Other",
+        "id": "custom_software_other"
+      },
+      {
+        "label": "Back to Services",
+        "id": "services"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "custom_software_requirement": {
+    "text": "What are you looking to automate, improve or build?",
+    "options": []
+  },
+  "custom_software_other": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "custom_software_timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "custom_pricing": {
+    "text": "Custom software pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+    "options": [
+      {
+        "label": "Get a Custom Quote",
+        "id": "custom_software_requirement"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share More Project Details",
+        "id": "custom_software_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "ai_automation": {
+    "text": "How can we help you leverage AI and automation?",
+    "options": [
+      {
+        "label": "AI for My Business",
+        "id": "ai_requirement"
+      },
+      {
+        "label": "AI Automation",
+        "id": "ai_requirement"
+      },
+      {
+        "label": "AI Lead Generation",
+        "id": "ai_requirement"
+      },
+      {
+        "label": "AI Personalization",
+        "id": "ai_requirement"
+      },
+      {
+        "label": "AI Chatbot",
+        "id": "chatbot"
+      },
+      {
+        "label": "Other",
+        "id": "ai_other"
+      },
+      {
+        "label": "Back to Services",
+        "id": "services"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "ai_requirement": {
+    "text": "Tell us briefly how you'd like to use AI in your business.",
+    "options": []
+  },
+  "ai_other": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "ai_timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "ai_pricing": {
+    "text": "AI & automation pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+    "options": [
+      {
+        "label": "Get a Custom Quote",
+        "id": "ai_requirement"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share More Project Details",
+        "id": "ai_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "chatbot": {
+    "text": "What type of chatbot are you interested in?",
+    "options": [
+      {
+        "label": "Website Chatbot",
+        "id": "chatbot_requirement"
+      },
+      {
+        "label": "WhatsApp Chatbot",
+        "id": "chatbot_requirement"
+      },
+      {
+        "label": "Lead Generation Bot",
+        "id": "chatbot_requirement"
+      },
+      {
+        "label": "Customer Support Bot",
+        "id": "chatbot_requirement"
+      },
+      {
+        "label": "RAG / Knowledge Base Chatbot",
+        "id": "chatbot_requirement"
+      },
+      {
+        "label": "Other",
+        "id": "chatbot_other"
+      },
+      {
+        "label": "Back to Services",
+        "id": "services"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "chatbot_requirement": {
+    "text": "Tell us briefly what you'd like the chatbot to do.",
+    "options": []
+  },
+  "chatbot_other": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "chatbot_timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "chatbot_pricing": {
+    "text": "AI chatbot pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+    "options": [
+      {
+        "label": "Get a Tailored Quote",
+        "id": "chatbot_requirement"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share More Project Details",
+        "id": "chatbot_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "ecommerce": {
+    "text": "What kind of e-commerce solution are you looking for?",
+    "options": [
+      {
+        "label": "New E-commerce Store",
+        "id": "ecommerce_requirement"
+      },
+      {
+        "label": "Shopify Store",
+        "id": "ecommerce_requirement"
+      },
+      {
+        "label": "Existing Store Redesign",
+        "id": "ecommerce_requirement"
+      },
+      {
+        "label": "Custom E-commerce Platform",
+        "id": "ecommerce_requirement"
+      },
+      {
+        "label": "Store Integrations / Automation",
+        "id": "ecommerce_requirement"
+      },
+      {
+        "label": "Other",
+        "id": "ecommerce_other"
+      },
+      {
+        "label": "Back to Services",
+        "id": "services"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "ecommerce_requirement": {
+    "text": "Tell us briefly about the e-commerce store or features you need.",
+    "options": []
+  },
+  "ecommerce_other": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "ecommerce_timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "ecommerce_pricing": {
+    "text": "E-commerce pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+    "options": [
+      {
+        "label": "Get an Exact Estimate",
+        "id": "ecommerce_requirement"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share More Project Details",
+        "id": "ecommerce_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "seo_marketing": {
+    "text": "What digital marketing services are you looking for?",
+    "options": [
+      {
+        "label": "SEO",
+        "id": "marketing_requirement"
+      },
+      {
+        "label": "Social Media Marketing",
+        "id": "marketing_requirement"
+      },
+      {
+        "label": "Paid Ads",
+        "id": "marketing_requirement"
+      },
+      {
+        "label": "SEO + Paid Ads",
+        "id": "marketing_requirement"
+      },
+      {
+        "label": "Digital Growth Strategy",
+        "id": "marketing_requirement"
+      },
+      {
+        "label": "Other",
+        "id": "marketing_other"
+      },
+      {
+        "label": "Back to Services",
+        "id": "services"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "marketing_requirement": {
+    "text": "Tell us briefly about your marketing goals (e.g. increase traffic, generate leads, improve rankings, run paid campaigns):",
+    "options": []
+  },
+  "marketing_other": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "marketing_timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "marketing_pricing": {
+    "text": "SEO and digital marketing pricing is project-based: it depends on your scope, features and integrations. Share a few details and our team will prepare a tailored, no-obligation estimate, usually after a free discovery call.",
+    "options": [
+      {
+        "label": "Get a Custom Strategy",
+        "id": "marketing_requirement"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share More Project Details",
+        "id": "marketing_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "pricing": {
+    "text": "What would you like an estimate for?",
+    "options": [
+      {
+        "label": "Website",
+        "id": "website_pricing"
+      },
+      {
+        "label": "Mobile App",
+        "id": "mobile_pricing"
+      },
+      {
+        "label": "Custom Software",
+        "id": "custom_pricing"
+      },
+      {
+        "label": "AI / Automation",
+        "id": "ai_pricing"
+      },
+      {
+        "label": "AI Chatbot",
+        "id": "chatbot_pricing"
+      },
+      {
+        "label": "E-commerce",
+        "id": "ecommerce_pricing"
+      },
+      {
+        "label": "SEO / Marketing",
+        "id": "marketing_pricing"
+      },
+      {
+        "label": "Other",
+        "id": "generic_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "generic_requirement": {
+    "text": "Tell us briefly what you're looking for.",
+    "options": []
+  },
+  "timeline": {
+    "text": "What is your expected timeline?",
+    "options": [
+      {
+        "label": "Immediately",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Within 1 Month",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "1–3 Months",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Exploring",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "talk_to_team": {
+    "text": "How would you like to continue?",
+    "options": [
+      {
+        "label": "Get an Estimate",
+        "id": "pricing"
+      },
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Share Project Details First",
+        "id": "generic_requirement"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "booking": {
+    "text": "Great, let's book a free discovery call! What day and time work best for you? (Please include your time zone.)",
+    "options": [
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "booking_confirmed": {
+    "text": "Thank you! Your discovery call request has been received. Our team will follow up shortly to confirm the details.",
+    "options": [
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "human_handoff": {
+    "text": "Please share your preferred contact method (email or phone number), and our team will reach out directly.",
+    "options": [
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "handoff_confirmed": {
+    "text": "Thank you! Our team has received your contact details and will reach out to you shortly.",
+    "options": [
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "portfolio": {
+    "text": "What type of work would you like to see?",
+    "options": [
+      {
+        "label": "E-commerce",
+        "id": "portfolio_ecommerce"
+      },
+      {
+        "label": "Website",
+        "id": "portfolio_website"
+      },
+      {
+        "label": "Mobile App",
+        "id": "portfolio_mobile"
+      },
+      {
+        "label": "Custom Platform",
+        "id": "portfolio_custom"
+      },
+      {
+        "label": "AI / Automation",
+        "id": "portfolio_ai"
+      },
+      {
+        "label": "Other",
+        "id": "rag_mode"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "portfolio_ecommerce": {
+    "text": "We build custom Shopify and Shopify Plus stores and custom e-commerce platforms, including payment gateways, product builders and inventory automation. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+    "options": [
+      {
+        "label": "Discuss My Project",
+        "id": "ecommerce"
+      },
+      {
+        "label": "Talk to Our Team",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "portfolio_website": {
+    "text": "We build responsive corporate websites, high-converting landing pages and full-stack web applications using React, Next.js, Node.js and Python. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+    "options": [
+      {
+        "label": "Discuss My Project",
+        "id": "website_development"
+      },
+      {
+        "label": "Talk to Our Team",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "portfolio_mobile": {
+    "text": "We build native iOS (Swift) and Android (Kotlin) apps and cross-platform apps with Flutter and React Native, including offline sync, push notifications and payment integration. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+    "options": [
+      {
+        "label": "Discuss My Project",
+        "id": "mobile_app"
+      },
+      {
+        "label": "Talk to Our Team",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "portfolio_custom": {
+    "text": "We build tailored SaaS platforms, enterprise portals, internal CRM/ERP automation and API integrations, deployed on AWS, GCP or Azure. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+    "options": [
+      {
+        "label": "Discuss My Project",
+        "id": "custom_software"
+      },
+      {
+        "label": "Talk to Our Team",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "portfolio_ai": {
+    "text": "We build business workflow automation, AI chatbots for websites and WhatsApp, and RAG assistants trained on company documents and internal knowledge. Our team can share case studies relevant to your project. Would you like to discuss a similar project?",
+    "options": [
+      {
+        "label": "Discuss My Project",
+        "id": "ai_automation"
+      },
+      {
+        "label": "Talk to Our Team",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "rag_mode": {
+    "text": "Ask me anything about our services, process, technologies, or pricing.",
+    "options": [
+      {
+        "label": "Talk to Our Team",
+        "id": "talk_to_team"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  },
+  "exact_estimate": {
+    "text": "To provide an exact estimate tailored to your project, our team reviews your scope and requirements during a quick discovery call, or we can have a specialist contact you directly.",
+    "options": [
+      {
+        "label": "Book a Free Discovery Call",
+        "id": "booking"
+      },
+      {
+        "label": "Have Someone Contact Me",
+        "id": "human_handoff"
+      },
+      {
+        "label": "Main Menu",
+        "id": "welcome"
+      }
+    ]
+  }
+}

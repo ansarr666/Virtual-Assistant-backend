@@ -27,12 +27,13 @@ def _isolate_external_services(monkeypatch):
     settings = get_settings()
     # Tokens blanked; app secrets blanked so unsigned test webhooks are accepted
     # (signature checks have their own tests that set a secret).
-    for field in ("FB_PAGE_ACCESS_TOKEN", "IG_ACCESS_TOKEN", "WHATSAPP_ACCESS_TOKEN", "META_APP_SECRET", "IG_APP_SECRET"):
+    for field in ("FB_PAGE_ACCESS_TOKEN", "IG_ACCESS_TOKEN", "WHATSAPP_ACCESS_TOKEN", "META_APP_SECRET", "IG_APP_SECRET", "OPENROUTER_API_KEY"):
         monkeypatch.setattr(settings, field, "")
     monkeypatch.setattr(settings, "META_VERIFY_TOKEN", TEST_META_VERIFY_TOKEN)
     monkeypatch.setattr(meta_webhook.facebook_channel, "page_access_token", "")
     monkeypatch.setattr(meta_webhook.instagram_channel, "access_token", "")
     monkeypatch.setattr(meta_webhook.whatsapp_channel, "access_token", "")
+    monkeypatch.setattr(settings, "RAG_API_BASE_URL", "http://test-rag.local")
     monkeypatch.setattr(settings, "GOOGLE_SERVICE_ACCOUNT_JSON", "")
     from app.channels.options import menu_memory
     menu_memory.clear()

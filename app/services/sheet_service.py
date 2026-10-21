@@ -7,6 +7,7 @@ Authentication happens on first use; failures raise RepositoryError with a
 message explaining how to fix the configuration.
 """
 import logging
+from pathlib import Path
 import threading
 from typing import Any
 
@@ -59,6 +60,13 @@ def _build_credentials():
 
         logger.info("Google Sheets: using service account file %s", settings.GOOGLE_SERVICE_ACCOUNT_FILE)
         return Credentials.from_service_account_file(settings.GOOGLE_SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+    token_file = Path(".runtime/google_token.json")
+    if token_file.is_file():
+        from google.oauth2.credentials import Credentials
+
+        logger.info("Google Sheets: using authorized user token from %s", token_file)
+        return Credentials.from_authorized_user_file(str(token_file), scopes=SCOPES)
 
     # Application Default Credentials: a user login, a service account key via
     # GOOGLE_APPLICATION_CREDENTIALS, or an impersonated service account configured with
@@ -117,16 +125,36 @@ def get_spreadsheet():
 
 
 def get_worksheet(name: str):
-    if name in _WORKSHEET_CACHE:
-        return _WORKSHEET_CACHE[name]
+    key = name.lower()
+    if key in _WORKSHEET_CACHE:
+        return _WORKSHEET_CACHE[key]
     spreadsheet = get_spreadsheet()
-    try:
-        worksheet = spreadsheet.worksheet(name)
-    except gspread.exceptions.WorksheetNotFound as e:
-        raise RepositoryError(f"Worksheet '{name}' does not exist in the spreadsheet.") from e
-    except Exception as e:
-        raise RepositoryError(f"Could not open worksheet '{name}': {type(e).__name__}: {e}") from e
-    _WORKSHEET_CACHE[name] = worksheet
+    worksheet = None
+    if hasattr(spreadsheet, "worksheets"):
+        try:
+            ws_map = {w.title.lower(): w for w in spreadsheet.worksheets()}
+            if key in ws_map:
+                worksheet = ws_map[key]
+            else:
+                from app.repositories.google_sheet import SHEET_COLUMNS, _col_letter
+                headers = SHEET_COLUMNS.get(key, [])
+                cols = max(len(headers) + 5, 20)
+                worksheet = spreadsheet.add_worksheet(title=name, rows=1000, cols=cols)
+                if headers:
+                    worksheet.update([headers], f"A1:{_col_letter(len(headers))}1")
+                logger.info("Google Sheets: auto-created missing worksheet '%s'", name)
+        except Exception as e:
+            logger.warning("Could not list or create worksheet '%s': %s", name, e)
+
+    if worksheet is None:
+        try:
+            worksheet = spreadsheet.worksheet(name)
+        except gspread.exceptions.WorksheetNotFound as e:
+            raise RepositoryError(f"Worksheet '{name}' does not exist in the spreadsheet.") from e
+        except Exception as e:
+            raise RepositoryError(f"Could not open worksheet '{name}': {type(e).__name__}: {e}") from e
+
+    _WORKSHEET_CACHE[key] = worksheet
     return worksheet
 
 

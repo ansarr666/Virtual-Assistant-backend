@@ -2,7 +2,7 @@
 
 **Project Name:** Omnichannel Conversational Lead Bot  
 **Backend Directory:** `D:\Omnichannel Conversational Lead Bot-backend`  
-**Frontend Directory:** `D:\Omnichannel Conversational Lead Bot-backend\frontend`  
+**Frontend Repository:** Maintained in separate frontend repository (connects via `CORS_ORIGINS`)
 **Date:** October 9, 2026  
 **Status:** Core engine fully functional (259/259 tests passing); Meta App pending security checkpoint clearance.
 
@@ -13,7 +13,7 @@
 The **Omnichannel Conversational Lead Bot** is an enterprise-grade, multi-tenant lead generation and customer qualification platform. It engages inbound prospects across multiple messaging channels, automates initial discovery, answers company and technical questions via Retrieval-Augmented Generation (RAG), qualifies project requirements, and books discovery calls or initiates human handoffs.
 
 ### Key Capabilities
-- **Omnichannel Ingress:** Single unified conversational experience across **Web Chat**, **Facebook Messenger**, **Instagram DM**, and **WhatsApp Business**.
+- **Omnichannel Ingress:** Single unified conversational experience across **Facebook Messenger**, **Instagram DM**, and **WhatsApp Business** (Web channel decommissioned).
 - **Multi-Tenant Architecture:** Fully decoupled business logic driven by tenant JSON configurations and JSON flow state machines. Zero code changes required to onboard new clients.
 - **Hybrid Intent Engine:** Blends deterministic regex matching, alias maps, fuzzy matching, and Google Gemini semantic classification with strict priority rules (buying intent always supersedes generic info queries).
 - **RAG Knowledge Layer:** Integrated with external OrionSoft RAG microservices, backed by a local grounded fallback corpus with circuit-breaker protection, timeouts, and safe responses.
@@ -86,7 +86,7 @@ All channel adapters inherit from unified base classes in `app/channels/`, ensur
 
 | Channel | Protocol & API | Payload Format / Interactive Controls | Adapter File |
 | :--- | :--- | :--- | :--- |
-| **Web Chat** | HTTP `POST /chat` | Standard JSON (`reply`, `options[]`). React 19 client with automatic session ID and retry logic. | `app/api/chat.py`<br>`frontend/src/` |
+| **Web Chat** | HTTP `POST /chat` | Standard JSON (`reply`, `options[]`). Connects to external frontend web chat client with session ID and retry logic. | `app/api/chat.py`<br>*(External frontend client)* |
 | **Facebook Messenger** | Meta Graph API `v20.0`/`v21.0`<br>`POST /me/messages` | Text chunks ($\le 2000$ chars) + Quick Replies ($\le 13$ options). Paged menus with *"More options"* and graceful text fallback if rejected. | `app/channels/facebook.py`<br>`app/channels/base.py` |
 | **Instagram DM** | Instagram Graph API<br>`graph.instagram.com/v20.0/me/messages` | Text chunks ($\le 1000$ chars) + Quick Replies ($\le 13$ options). Includes auto-refresh background task for 60-day `IGAA` tokens. | `app/channels/instagram.py`<br>`app/channels/instagram_token.py` |
 | **WhatsApp Business** | WhatsApp Cloud API<br>`POST /{phone_id}/messages` | $\le 3$ options: Interactive Reply Buttons.<br>$> 3$ options: Interactive List Menu ($\le 10$ rows, sections). Plain text fallback. Customer phone masking in logs. | `app/channels/whatsapp.py` |
@@ -246,11 +246,7 @@ API docs available at: `http://localhost:8001/docs`
 Health check: `http://localhost:8001/health`
 
 **Frontend (Web Chat):**
-```powershell
-cd "D:\Omnichannel Conversational Lead Bot-backend\frontend"
-npm run dev -- --port 5173
-```
-Chat interface available at: `http://localhost:5173`
+The web chat frontend is maintained in a separate repository. Ensure the frontend's backend API base URL points to `http://127.0.0.1:8001` (or your backend URL) and that its origin is allowed in this backend's `CORS_ORIGINS`.
 
 ### 2. Running Automated Tests
 ```powershell
@@ -318,12 +314,6 @@ Omnichannel Conversational Lead Bot-backend/
 │   └── TRD.md                      # Technical Requirements Document
 ├── flows/
 │   └── orionsoft_flow.json         # State machine flow definition (1500+ lines)
-├── frontend/                       # React 19 + TypeScript + Vite web chat interface
-│   ├── src/
-│   │   ├── components/             # Chat UI components (bubbles, options, header)
-│   │   ├── services/chatApi.ts     # Client POST /chat connector
-│   │   └── App.tsx                 # Root chat application
-│   └── package.json
 ├── scripts/
 │   ├── check_channels.py           # Automated health check for FB, IG, WA
 │   └── diagnose_facebook_meta.py   # Facebook-specific subscription diagnostics

@@ -17,6 +17,7 @@ from app.channels.options import EXPIRED_MENU_REPLY, is_more_selection, menu_mem
 from app.channels.whatsapp import WhatsAppChannel, mask_phone
 from app.config import get_settings
 from app.models.schemas import ChatRequest
+from app.repositories.base import RepositoryError
 from app.services import orchestrator
 from app.services.tenant_service import list_tenants
 
@@ -522,7 +523,17 @@ async def handle_single_event(
 
     # The orchestrator is synchronous and does blocking Google Sheets I/O; run it in a
     # worker thread so a slow Sheets call cannot freeze the event loop.
-    bot_response = await run_in_threadpool(orchestrator.process_message, chat_req)
+    try:
+        bot_response = await run_in_threadpool(orchestrator.process_message, chat_req)
+    except RepositoryError as e:
+        logger.error(
+            "Persistence unavailable processing %s message for user=%s: %s",
+            event.get("channel"), _log_user(event), e,
+        )
+        send_result: dict[str, Any] = {}
+        if adapter is not None:
+            send_result = await adapter.send_text_message(event["user_id"], RepositoryError.public_message)
+        return {"bot_response": None, "send_result": send_result}
 
     reply = bot_response.get("reply", "") or ""
     options = bot_response.get("options", []) or []

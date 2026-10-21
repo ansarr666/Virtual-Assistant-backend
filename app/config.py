@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ENV_FILE = PROJECT_ROOT / ".env"
 
 # Load .env once, early, for modules that still read os.environ directly.
-load_dotenv(ENV_FILE)
+load_dotenv(ENV_FILE, override=True)
 
 
 class Settings(BaseSettings):
@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     # After a quota/availability error, skip Gemini for this many seconds.
     GEMINI_COOLDOWN_SECONDS: float = 300.0
 
+    # Backup AI Provider (OpenRouter)
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_MODEL: str = "openai/gpt-4o-mini"
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_TIMEOUT_SECONDS: float = 8.0
+
     # "google_sheets" (default) or "memory" (local development without credentials).
     REPOSITORY_BACKEND: str = "google_sheets"
     GOOGLE_SERVICE_ACCOUNT_FILE: str = ""
@@ -33,6 +39,7 @@ class Settings(BaseSettings):
     GOOGLE_SHEET_ID: str = ""
     GOOGLE_SHEET_NAME: str = "Leads"
     GOOGLE_SHEETS_TIMEOUT_SECONDS: float = 15.0
+    GOOGLE_APPS_SCRIPT_URL: str = ""
 
     # Meta / Facebook Messenger / Instagram DM
     # Must be set in .env; webhook verification is refused while it is empty.
@@ -59,12 +66,14 @@ class Settings(BaseSettings):
     WHATSAPP_ACCESS_TOKEN: str = ""
 
     # OrionSoft External RAG Service
-    RAG_API_BASE_URL: str = "http://localhost:5000"
+    RAG_API_BASE_URL: str = ""
     RAG_TIMEOUT_SECONDS: float = 10.0
     RAG_API_KEY: str = ""
 
     # Comma-separated list of browser origins allowed to call the API.
     CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    # Regex for browser origins allowed to call the API (e.g. Netlify deployment and preview URLs).
+    CORS_ORIGIN_REGEX: str | None = r"https://[a-zA-Z0-9_.-]+\.netlify\.app"
     LOG_LEVEL: str = "INFO"
 
     @property

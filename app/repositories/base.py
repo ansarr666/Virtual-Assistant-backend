@@ -16,6 +16,9 @@ class LeadRepository(ABC):
     def save_user(self, data: dict):
         pass
 
+    def get_user(self, tenant_id: str, user_id: str) -> dict | None:
+        return None
+
     @abstractmethod
     def save_conversation(self, data: dict):
         pass
@@ -40,6 +43,12 @@ class LeadRepository(ABC):
     @abstractmethod
     def save_state(self, data: dict):
         pass
+
+    def save_lead(self, data: dict):
+        pass
+
+    def get_lead(self, tenant_id: str, lead_id: str) -> dict | None:
+        return None
 
     def get_idempotent_response(self, tenant_id: str, conversation_id: str, client_message_id: str) -> dict | None:
         """Returns cached response for client_message_id if already processed."""

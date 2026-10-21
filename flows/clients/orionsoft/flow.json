@@ -1,0 +1,160 @@
+{
+  "flow_id": "orionsoft_lead_gen",
+  "tenant_id": "client_001",
+  "version": "1.0.0",
+  "start_step": "welcome",
+  "templates_ref": "templates.json",
+  "steps_ref": "steps.json",
+  "destinations_ref": "destinations.json",
+  "config_ref": "config.json",
+  "routes": {
+    "MAIN_MENU": "welcome",
+    "SERVICES": "services",
+    "PRICING": "pricing",
+    "BOOK_CALL": "booking",
+    "HUMAN_AGENT": "talk_to_team",
+    "CONTACT_ME": "human_handoff",
+    "RAG": "rag_mode",
+    "GENERIC_REQUIREMENT": "generic_requirement",
+    "PORTFOLIO": "portfolio"
+  },
+  "global_options": {
+    "Main Menu": "welcome",
+    "Back to Main Menu": "welcome",
+    "Back to Services": "services",
+    "Our Services": "services",
+    "Explore Other Services": "services",
+    "Pricing & Estimates": "pricing",
+    "Talk to Our Team": "talk_to_team",
+    "Talk to Team": "talk_to_team",
+    "Book a Free Discovery Call": "booking",
+    "Have Someone Contact Me": "human_handoff",
+    "Get an Exact Estimate": "exact_estimate",
+    "Ask a Question": "rag_mode",
+    "Ask Another Question": "rag_mode"
+  },
+  "fallback_options": [
+    "Our Services",
+    "Pricing & Estimates",
+    "Talk to Our Team",
+    "Main Menu"
+  ],
+  "short_labels": {
+    "AI Chatbot Development": "AI Chatbots",
+    "Book a Free Discovery Call": "Book Discovery Call",
+    "Custom E-commerce Platform": "Custom E-commerce",
+    "Custom Features / Platform": "Custom Features",
+    "Digital Growth Strategy": "Growth Strategy",
+    "Existing App / Improvements": "Existing App",
+    "Existing Store Redesign": "Store Redesign",
+    "Explore Other Services": "Other Services",
+    "Get a Custom Strategy": "Custom Strategy",
+    "Get an Exact Estimate": "Exact Estimate",
+    "Have Someone Contact Me": "Contact Me",
+    "Mobile App Development": "Mobile Apps",
+    "Portfolio / Experience": "Portfolio",
+    "RAG / Knowledge Base Chatbot": "Knowledge Base Bot",
+    "SEO & Digital Marketing": "SEO & Marketing",
+    "Share More Project Details": "More Project Details",
+    "Share Project Details First": "Share Details First",
+    "Social Media Marketing": "Social Media",
+    "Store Integrations / Automation": "Store Integrations",
+    "Website Features / Technology": "Website Features"
+  },
+  "services": {
+    "WEBSITE": {
+      "service": "Website Development",
+      "menu_step": "website_development",
+      "requirement_step": "website_requirement",
+      "pricing_step": "website_pricing",
+      "aliases": [
+        "Website",
+        "New Website",
+        "Website Redesign",
+        "E-commerce Website",
+        "Website Features"
+      ]
+    },
+    "MOBILE_APP": {
+      "service": "Mobile App Development",
+      "menu_step": "mobile_app",
+      "requirement_step": "mobile_requirement",
+      "pricing_step": "mobile_pricing",
+      "aliases": [
+        "Mobile App",
+        "App Idea",
+        "Android App",
+        "iOS App",
+        "Cross-Platform App",
+        "Existing App Improvements"
+      ]
+    },
+    "CUSTOM_SOFTWARE": {
+      "service": "Custom Software",
+      "menu_step": "custom_software",
+      "requirement_step": "custom_software_requirement",
+      "pricing_step": "custom_pricing",
+      "aliases": [
+        "Business Software",
+        "Process Automation",
+        "Custom Platform",
+        "System Integrations",
+        "Internal Tools"
+      ]
+    },
+    "AI_AUTOMATION": {
+      "service": "AI & Automation",
+      "menu_step": "ai_automation",
+      "requirement_step": "ai_requirement",
+      "pricing_step": "ai_pricing",
+      "aliases": [
+        "Business AI",
+        "Workflow Automation",
+        "Lead Generation AI",
+        "AI Personalization"
+      ]
+    },
+    "CHATBOT": {
+      "service": "AI Chatbot Development",
+      "menu_step": "chatbot",
+      "requirement_step": "chatbot_requirement",
+      "pricing_step": "chatbot_pricing",
+      "aliases": [
+        "AI Chatbot",
+        "Website Chatbot",
+        "WhatsApp Chatbot",
+        "Lead Generation Bot",
+        "Customer Support Bot",
+        "RAG Chatbot"
+      ]
+    },
+    "SHOPIFY_ECOMMERCE": {
+      "service": "E-commerce / Shopify",
+      "menu_step": "ecommerce",
+      "requirement_step": "ecommerce_requirement",
+      "pricing_step": "ecommerce_pricing",
+      "aliases": [
+        "E-commerce",
+        "New Store",
+        "Shopify Store",
+        "Store Redesign",
+        "Custom E-commerce Platform",
+        "Store Integrations"
+      ]
+    },
+    "SEO": {
+      "service": "SEO & Digital Marketing",
+      "menu_step": "seo_marketing",
+      "requirement_step": "marketing_requirement",
+      "pricing_step": "marketing_pricing",
+      "aliases": [
+        "SEO",
+        "Social Media Marketing",
+        "Paid Advertising",
+        "Paid Ads",
+        "SEO + Paid Ads",
+        "Digital Growth Strategy"
+      ]
+    }
+  }
+}

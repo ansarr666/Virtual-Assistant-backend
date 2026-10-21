@@ -439,3 +439,109 @@ def test_share_project_details_first_flow(setup_in_memory_repo):
     assert "Main Menu" in opts
     # Since requirements are now known, do not re-ask Share Project Details First
     assert "Share Project Details First" not in opts
+
+
+def test_estimate_flow_no_redundant_options_or_loop(setup_in_memory_repo):
+    """
+    Tests:
+    After a user selects a timeline and chooses "Get an Estimate",
+    the bot explains that pricing is project-based, then shows "Get an Exact Estimate".
+    Selecting "Get an Exact Estimate" progresses to exact_estimate (explaining discovery call)
+    without repeating "How would you like to continue?" and without duplicating "Get an Estimate".
+    Then "Book a Free Discovery Call" progresses to booking.
+    """
+    user_id = "user_estimate_no_loop"
+    tenant_id = "client_001"
+
+    def send(msg: str):
+        return orchestrator.process_message(
+            SimpleNamespace(
+                tenant_id=tenant_id,
+                user_id=user_id,
+                message=msg,
+                channel="web"
+            )
+        )
+
+    send("Hi")
+    send("Our Services")
+    send("Website Development")
+    send("New Website")
+    send("E-commerce store with Stripe payment")
+    res_timeline = send("Within 1 Month")
+    assert "How would you like to continue?" in res_timeline["reply"]
+    assert "Get an Estimate" in res_timeline["options"]
+
+    # 1. Choose "Get an Estimate"
+    res_est = send("Get an Estimate")
+    assert res_est["current_step"] == "website_pricing"
+    assert "website development pricing is project-based" in res_est["reply"].lower()
+    assert "Get an Exact Estimate" in res_est["options"]
+    assert "Book a Free Discovery Call" in res_est["options"]
+    assert "Have Someone Contact Me" in res_est["options"]
+    # Does not repeat "Get an Estimate"
+    assert "Get an Estimate" not in res_est["options"]
+
+    # 2. Choose "Get an Exact Estimate" -> distinct next step
+    res_exact = send("Get an Exact Estimate")
+    assert res_exact["current_step"] == "exact_estimate"
+    assert "How would you like to continue?" not in res_exact["reply"]
+    assert "discovery call" in res_exact["reply"].lower()
+    # Does not repeat choices already made
+    assert "Get an Estimate" not in res_exact["options"]
+    assert "Get an Exact Estimate" not in res_exact["options"]
+    assert "Book a Free Discovery Call" in res_exact["options"]
+    assert "Have Someone Contact Me" in res_exact["options"]
+    assert "Main Menu" in res_exact["options"]
+
+    # 3. Follow discovery call branch
+    res_book = send("Book a Free Discovery Call")
+    assert res_book["current_step"] == "booking"
+    assert res_book["mode"] == "booking"
+
+
+def test_estimate_flow_alternative_branches(setup_in_memory_repo):
+    """
+    Tests that other choices from pricing and exact_estimate lead to their intended flows:
+    - Direct booking from pricing
+    - Direct contact from pricing
+    - Contact from exact_estimate
+    """
+    tenant_id = "client_001"
+
+    def make_chat(user_id: str):
+        def send(msg: str):
+            return orchestrator.process_message(
+                SimpleNamespace(
+                    tenant_id=tenant_id,
+                    user_id=user_id,
+                    message=msg,
+                    channel="web"
+                )
+            )
+        return send
+
+    # Branch A: Contact from exact_estimate
+    chat_a = make_chat("user_alt_a")
+    for m in ["Hi", "Our Services", "Website Development", "New Website", "Corporate website", "Immediately", "Get an Estimate", "Get an Exact Estimate"]:
+        chat_a(m)
+    res_contact = chat_a("Have Someone Contact Me")
+    assert res_contact["current_step"] == "human_handoff"
+    assert res_contact["mode"] == "handoff"
+
+    # Branch B: Direct booking from website_pricing
+    chat_b = make_chat("user_alt_b")
+    for m in ["Hi", "Our Services", "Website Development", "New Website", "Corporate website", "Immediately", "Get an Estimate"]:
+        chat_b(m)
+    res_book = chat_b("Book a Free Discovery Call")
+    assert res_book["current_step"] == "booking"
+    assert res_book["mode"] == "booking"
+
+    # Branch C: Direct contact from website_pricing
+    chat_c = make_chat("user_alt_c")
+    for m in ["Hi", "Our Services", "Website Development", "New Website", "Corporate website", "Immediately", "Get an Estimate"]:
+        chat_c(m)
+    res_handoff = chat_c("Have Someone Contact Me")
+    assert res_handoff["current_step"] == "human_handoff"
+    assert res_handoff["mode"] == "handoff"
+

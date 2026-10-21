@@ -160,7 +160,9 @@ else:
     add("instagram", "account subscribed (messages)", "messages" in fields, str(fields) or err(d))
 add("instagram", "IG_APP_SECRET (webhook signatures)", bool(s.IG_APP_SECRET),
     "" if s.IG_APP_SECRET else "real Instagram webhooks will be rejected without it")
-if IG_APP_ID and s.IG_APP_SECRET:
+if "instagram" in app_subs:
+    app_sub_check("instagram", "instagram", ["messages", "messaging_postbacks"])
+elif IG_APP_ID and s.IG_APP_SECRET:
     _, d = call("GET", f"{FB}/{IG_APP_ID}/subscriptions", f"{IG_APP_ID}|{s.IG_APP_SECRET}")
     ig_sub = next((x for x in d.get("data", []) if x.get("object") == "instagram"), None)
     add("instagram", "Instagram app webhook", bool(ig_sub and ig_sub.get("active")),
